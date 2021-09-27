@@ -1,0 +1,4 @@
+Callibration should work, but needs testing.
+Currently finds angle and spits out a quadrant the center is in.
+  Only works with yellow hexagon
+  Quadrants will need to standardized
