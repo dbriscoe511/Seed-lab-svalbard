@@ -22,6 +22,7 @@ while True:
         system.send(angle)
         
         measured_angle = system.read()
+        print(measured_angle)
         system.update_lcd(measured_angle)
         previous_angle = angle
 

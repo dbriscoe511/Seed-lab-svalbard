@@ -24,8 +24,9 @@ class comm:
                         raise ValueError("outside of byte range")
                 self.bus.write_byte(self.addr,val)
         def read(self):
-                self.bus.read_byte(self.addr)
+                return self.bus.read_byte(self.addr)
         def update_lcd(self,val):
+                self.lcd.clear()
                 self.lcd.message = str(val)
         
                 
