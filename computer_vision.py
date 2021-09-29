@@ -3,7 +3,6 @@ from picamera import PiCamera
 from time import sleep
 import numpy as np
 import cv2 as cv
-from matplotlib import pyplot as plt
 
 camera = PiCamera()
 gains = []
@@ -81,5 +80,7 @@ elif 13.5 < angle:
     print("4")
 im2 = cv.cvtColor(binary, cv.COLOR_GRAY2BGR)
 im2 = cv.circle(im2, (cx, cy), 5, (0,255,0), 2)
-plt.imshow(im2)
-plt.show()
+cv.imshow('img',im2)
+#cv.show()
+cv.waitkey()
+cv.destroyAllWindows()
