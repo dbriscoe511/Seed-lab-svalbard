@@ -7,6 +7,7 @@ class comm:
         bus = 0
         addr = 0
         lcd = 0
+        lcd_i2c= 0
 
         def __init__(self):
                 self.bus = smbus2.SMBus(1) # initializes an i2c line with smbus protocol
@@ -14,7 +15,7 @@ class comm:
                 time.sleep(0.2)
 
                 self.lcd_i2c = board.I2C() # the LCD is not smbus complient, so a seperate i2c line is initialized on the same line 
-                self.lcd = chlcd.Character_LCD_RGB_I2C(lcd_i2c,16,2) # config code specific to this lcd
+                self.lcd = chlcd.Character_LCD_RGB_I2C(self.lcd_i2c,16,2) # config code specific to this lcd
                 self.lcd.message = "initialized"
                 time.sleep(0.2)
 
@@ -23,7 +24,7 @@ class comm:
                         raise ValueError("outside of byte range")
                 self.bus.write_byte(self.addr,val)
         def read(self):
-                self.bus.read_byte()
+                self.bus.read_byte(self.addr)
         def update_lcd(self,val):
                 self.lcd.message = str(val)
         

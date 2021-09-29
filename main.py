@@ -1,6 +1,6 @@
 import time
 import comms
-import computer_vision 
+#import computer_vision 
 
 previous_angle = 1
 system = comms.comm()
@@ -21,7 +21,7 @@ while True:
         system.send(angle)
         
         measured_angle = system.read()
-        system.update_lcd(measured_angle*90)
+        system.update_lcd(measured_angle)
         previous_angle = angle
 
     
