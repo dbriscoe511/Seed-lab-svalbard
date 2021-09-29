@@ -17,9 +17,9 @@ while True:
 
         
         comms.send(angle)
-        time.sleep(0.5)
+        
         measured_angle = comms.read()
-        comms.update_lcd_ecnoder(measured_angle*90)
+        comms.update_lcd(measured_angle*90)
         previous_angle = angle
 
     
