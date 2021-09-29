@@ -6,15 +6,16 @@ previous_angle = 1
 system = comms.comm()
 while True:
     #check comp vision, get angle
-    angle = 2
+
+    angle = int(input("enter angle"))
     measured_angle = 0
     time.sleep(0.5)
 
     if not angle == previous_angle:
         if(angle-previous_angle>0):
-            encoderangle = 64*(angle-previous_angle)
+            encoderangle = (angle-previous_angle)
         else:
-            encoderangle = 64*(angle-previous_angle)+255
+            encoderangle = (angle-previous_angle+4)%4
 
         
         system.send(angle)
