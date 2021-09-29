@@ -12,6 +12,7 @@ while True:
     time.sleep(0.5)
 
     if not angle == previous_angle:
+        print("sending...")
         if(angle-previous_angle>0):
             encoderangle = (angle-previous_angle)
         else:
