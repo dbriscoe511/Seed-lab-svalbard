@@ -3,6 +3,7 @@ import comms
 import computer_vision 
 
 previous_angle = 1
+system = comms.comm()
 while True:
     #check comp vision, get angle
     angle = 2
@@ -16,10 +17,10 @@ while True:
             encoderangle = 64*(angle-previous_angle)+255
 
         
-        comms.send(angle)
+        system.send(angle)
         
-        measured_angle = comms.read()
-        comms.update_lcd(measured_angle*90)
+        measured_angle = system.read()
+        system.update_lcd(measured_angle*90)
         previous_angle = angle
 
     
