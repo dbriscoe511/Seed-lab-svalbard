@@ -11,9 +11,9 @@ while True:
 
     if not angle == previous_angle:
         if(angle-previous_angle>0):
-            encoderangle = 64*(angle-previous_angle)
+            encoderangle = 1*(angle-previous_angle)
         else:
-            encoderangle = 64*(angle-previous_angle)+255
+            encoderangle = 1*(angle-previous_angle)%4
 
         
         comms.send(angle)
