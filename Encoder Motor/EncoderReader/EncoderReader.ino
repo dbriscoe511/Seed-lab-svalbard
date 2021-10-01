@@ -24,15 +24,20 @@ void loop() { //main loop
     velocity = ((count/(3200.0/(2*PI)))-radian)/.01;
     radian = count/(3200.0/(2*PI));
     
-    
+    Serial.print(millis()/1000.0);
+    Serial.print("\t");
     Serial.print(count);
-    Serial.print("counts   ");
-    Serial.print(degree);
-    Serial.print("degrees   ");
+    //Serial.print("counts   ");
+    Serial.print("\t");
+    //Serial.print(degree);
+    //Serial.print("degrees   ");
     Serial.print(radian,3);
-    Serial.print("radians   ");
+    Serial.print("\t");
+    //Serial.print("radians   ");
     Serial.print(velocity);
-    Serial.println("rad/s");
+    //Serial.println("rad/s");
+    Serial.println();
+    
     lastTimeMeasured = millis();
     }
 }
