@@ -33,7 +33,7 @@ while True:
             encoderangle = (angle-previous_angle+4)%4
 
         
-        system.send(angle)
+        system.send(int(angle))
         
         measured_angle = system.read()
         print(measured_angle)
