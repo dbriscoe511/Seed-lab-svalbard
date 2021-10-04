@@ -32,7 +32,7 @@ def setup_camera():
     return camera
 
 def calibrate(camera):
-    
+    gains = []
     for i in range(10):
     #camera.capture('img' + str(i)+'.png')
         gains.append(camera.awb_gains)
