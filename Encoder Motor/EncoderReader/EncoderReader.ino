@@ -10,12 +10,17 @@ unsigned long lastTimeMeasured = 0;
 int degree = 0;
 float radian = 0;
 float velocity = 0;
+byte msg = 0;
 
 void setup() { //Sets up pins and serial monitor
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(channelAPin,INPUT_PULLUP);
   pinMode(channelBPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(channelAPin), encoderISR, CHANGE); //sets interrupt to happen when channel A changes
+
+  Wire.begin(4);                // join i2c bus with address #4
+  Wire.onReceive(receive_e); // register event
+  Wire.onRequest(sendData);
 }
 
 void loop() { //main loop
@@ -50,4 +55,14 @@ void encoderISR() { //interrupt
   } else {
     count-=2;
   }
+}
+
+void receive_e(int events)
+{
+  msg = Wire.read();
+  Serial.println(msg);
+}
+void sendData()
+{
+  Wire.write(msg);
 }
