@@ -1,3 +1,11 @@
+
+'''
+Handles i2c and lcd interfacing. 
+
+this is called by main when data needs to be sent or recived 
+to use, create a comm object, and call it's functions
+
+'''
 import smbus2 
 import board
 import adafruit_character_lcd.character_lcd_rgb_i2c as chlcd
