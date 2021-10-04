@@ -13,11 +13,11 @@ while True:
     #angle = int(input("enter angle"))
     t_angle = mcv.capture_angle(camera)
     print(str(t_angle)+'\n\n\n')
-    if(t_angle>270):
+    if(t_angle>90):
         angle = 4
-    elif(t_angle>180):
+    elif(t_angle>0):
         angle = 3
-    elif(t_angle>90):
+    elif(t_angle>-90):
         angle = 2
     else:
         angle = 1
