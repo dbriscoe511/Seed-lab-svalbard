@@ -22,8 +22,8 @@ float radian = 0;
 float integral = 0;
 float proportional = 0;
 float error = 0;
-float Kp = 1.1; //1.1
-float Ki = 0.34;
+float Kp = 4; //1.1
+float Ki = 0;//.38
 
 int PWM = 35;
 byte msg =0;
@@ -45,23 +45,31 @@ void setup() { //Sets up pins and serial monitor
 }
 
 void loop() { //main loop
-desired = msg*(PI/2.0);
+  desired = msg*(PI/2.0);
+  //Serial.println(desired);
 
-radian = ((count/3200.0)*2*PI);
-error = desired - radian;
-if(error > 0){
-  digitalWrite(signMotor1,HIGH);
-} else if (error < 0){
-  digitalWrite(signMotor1,LOW);
-}
+  radian = ((count/3200.0)*2*PI);
+  error = desired - radian;
+  Serial.println(error);
+  if(error > 0){
+    digitalWrite(signMotor1,HIGH);
+  } else if (error < 0){
+    digitalWrite(signMotor1,LOW);
+  }
 
-integral = integral + (error*((millis()-lastTimeMeasured)/1000.0));
-proportional = (Kp*error)+(Ki*integral);
-PWM = int(proportional*35);
-if(abs(PWM)>255){
-  PWM = PWM % 255;
-}
-analogWrite(voltageMotor1,PWM);
+  integral = integral + (error*((millis()-lastTimeMeasured)/1000.0));
+  proportional = (Kp*error)+(Ki*integral);
+  PWM = int(proportional*35);
+
+  //Serial.println(PWM);
+  if(abs(PWM)>255){
+    PWM = 255;
+  }
+ 
+  Serial.print(msg);
+  Serial.print("\t");
+  Serial.println(PWM);
+  analogWrite(voltageMotor1,abs(PWM));
 }
 
 void encoderISR() { //interrupt
