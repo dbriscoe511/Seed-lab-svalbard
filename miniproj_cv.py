@@ -24,8 +24,9 @@ import math
 
 
 def setup_camera():
-    seep(1)
+    #sleep(1)
     camera = PiCamera()
+    sleep(1)
     
     
     return camera
@@ -51,7 +52,7 @@ def calibrate(camera):
     return camera
     
 
-def miniproj_cv(camera):
+def capture_angle(camera):
     
     rawCapture = PiRGBArray(camera)
     

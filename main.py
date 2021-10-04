@@ -1,13 +1,18 @@
 import time
 import comms
-#import computer_vision 
+import miniproj_cv as mcv
 
 previous_angle = 1
 system = comms.comm()
+camera = mcv.setup_camera()
+camera = mcv.calibrate(camera)
+
 while True:
     #check comp vision, get angle
 
-    angle = int(input("enter angle"))
+    #angle = int(input("enter angle"))
+    angle = mcv.capture_angle(camera)
+    
     measured_angle = 0
     time.sleep(0.5)
 
