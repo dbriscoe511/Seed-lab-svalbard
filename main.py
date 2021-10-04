@@ -11,8 +11,17 @@ while True:
     #check comp vision, get angle
 
     #angle = int(input("enter angle"))
-    angle = mcv.capture_angle(camera)
-    
+    t_angle = mcv.capture_angle(camera)
+    print(str(t_angle)+'\n\n\n')
+    if(t_angle>270):
+        angle = 4
+    elif(t_angle>180):
+        angle = 3
+    elif(t_angle>90):
+        angle = 2
+    else:
+        angle = 1
+
     measured_angle = 0
     time.sleep(0.5)
 
