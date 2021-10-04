@@ -21,7 +21,7 @@ class comm:
 
         def send(self,val):
                 if val<0 or val>255:
-                        raise ValueError("outside of byte range")
+                        raise ValueError("outside of byte range") # must be a byte
                 self.bus.write_byte(self.addr,val)
         def read(self):
                 return self.bus.read_byte(self.addr)
