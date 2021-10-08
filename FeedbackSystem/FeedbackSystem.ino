@@ -1,35 +1,34 @@
-#include <Wire.h>
+#include <Wire.h> //library for I2C communication
 
-#define PI 3.1415926535897932384626433832795
+#define PI 3.1415926535897932384626433832795 //definition for PI constant
 
-//Pin assignment and global variable instantiation
-const int channelAPin = 2; 
-const int channelBPin = 5;
-const int enablePin = 4;
-const int voltageMotor1 = 9;
-const int voltageMotor2 = 10;
-const int signMotor1 = 7;
-const int signMotor2 = 8;
-const int statusFlag = 12;
+//Pin assignment
+const int channelAPin = 2; //Pin for reading encoder channel A
+const int channelBPin = 5; //Pin for reading encoder channel B
+const int enablePin = 4; //Pin for enabling motor shield
+const int voltageMotor1 = 9; //Pin for voltage given to motor 1
+const int voltageMotor2 = 10; //Pin for voltage given to motor 2 (not used)
+const int signMotor1 = 7; //Pin for direction of motor 1
+const int signMotor2 = 8; //Pin for direction of motor 2 (not used)
+const int statusFlag = 12; //Pin for status flag
 
+//Variables used in encoder ISR
 volatile bool channelA = HIGH; //Channel A set on default
 volatile bool channelB = HIGH; //Channel B set on default
 volatile int count = 0; //counter variable for position 
-unsigned long lastTimeMeasured = 0;
 
-float desired = 0;
-float radian = 0;
-float integral = 0;
-float proportional = 0;
-float error = 0;
-float Kp = 4; //1.1
-float Ki = 0;//.38
+unsigned long lastTimeMeasured = 0; //measures time between loops
+float desired = 0; //desired path, converted from msg
+float radian = 0; //actual path, converted from encoder counts
+float integral = 0; //integral path
+float proportional = 0; //proportional path
+float error = 0; //signal for difference between desired path and actual path
+float Kp = 4; //constant for proportional control (volt/radian)
+float Ki = 0; //constant for integral control (volt/radian)
+int PWM = 35; //converts volts to PWM counts (PWM/volt)
+byte msg =0; //msg for I2C communication
 
-int PWM = 35;
-byte msg =0;
-
-void setup() { //Sets up pins and serial monitor
-  Serial.begin(9600);
+void setup() { //Sets up pins
   pinMode(channelAPin,INPUT_PULLUP);
   pinMode(channelBPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(channelAPin), encoderISR, CHANGE); //sets interrupt to happen when channel A changes
@@ -37,57 +36,52 @@ void setup() { //Sets up pins and serial monitor
   pinMode(voltageMotor1,OUTPUT);
   pinMode(signMotor1,OUTPUT);
   pinMode(statusFlag,INPUT);
-  digitalWrite(enablePin,HIGH);
+  digitalWrite(enablePin,HIGH); //enables motor shield
 
-  Wire.begin(4);                // join i2c bus with address #4
+  Wire.begin(4);             // join i2c bus with address #4
   Wire.onReceive(receive_e); // register event
   Wire.onRequest(sendData);
 }
 
 void loop() { //main loop
-  desired = msg*(PI/2.0);
-  //Serial.println(desired);
+  desired = msg*(PI/2.0); //converts msg into the desired position
+  radian = ((count/3200.0)*2*PI); //converts encoder counts into the actual position
+  
+  error = desired - radian; //error path (rad)
 
-  radian = ((count/3200.0)*2*PI);
-  error = desired - radian;
-  Serial.println(error);
   if(error > 0){
-    digitalWrite(signMotor1,HIGH);
+    digitalWrite(signMotor1,HIGH); //sets direction clockwise if the error is positive (its not far enough)
   } else if (error < 0){
-    digitalWrite(signMotor1,LOW);
+    digitalWrite(signMotor1,LOW); //sets direction counterclockwise if the error is negative (its too far)
   }
 
-  integral = integral + (error*((millis()-lastTimeMeasured)/1000.0));
-  proportional = (Kp*error)+(Ki*integral);
-  PWM = int(proportional*35);
+  integral = integral + (error*((millis()-lastTimeMeasured)/1000.0)); //integral path (rad)
+  proportional = (Kp*error)+(Ki*integral); //proportional path (volts)
+  PWM = int(proportional*35); //converts volts into PWMs (1v=35pwm)
 
-  //Serial.println(PWM);
-  if(abs(PWM)>255){
+  if(abs(PWM)>255){ //saturates PWM and caps at 255
     PWM = 255;
   }
- 
-  Serial.print(msg);
-  Serial.print("\t");
-  Serial.println(PWM);
-  analogWrite(voltageMotor1,abs(PWM));
+
+  analogWrite(voltageMotor1,abs(PWM)); //writes PWM counts to motor 1
 }
 
-void encoderISR() { //interrupt
+void encoderISR() { //interrupt for encoder
   channelA = digitalRead(channelAPin);
   channelB = digitalRead(channelBPin);
-  if (channelA==channelB){
+  if (channelA==channelB){ //clockwise if channels are equal
     count+=2;
-  } else {
+  } else { //counterclockwise if channels are different
     count-=2;
   }
 }
 
-void receive_e(int events)
+void receive_e(int events) //receive function
 {
   msg = Wire.read();
-  Serial.println(msg);
 }
-void sendData()
+
+void sendData() //send function
 {
   Wire.write(msg);
 }

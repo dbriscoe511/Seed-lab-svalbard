@@ -14,6 +14,6 @@ void setup() {
 }
 
 void loop() {
-  analogWrite(voltageMotor1,35);
+  analogWrite(voltageMotor1,1);
   digitalWrite(signMotor1,HIGH);
 }

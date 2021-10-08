@@ -1,8 +1,9 @@
+#include <Wire.h>
 #define PI 3.1415926535897932384626433832795
 
 //Pin assignment and global variable instantiation
 const int channelAPin = 2;
-const int channelBPin = 4;
+const int channelBPin = 5;
 volatile bool channelA = HIGH; //Channel A set on default
 volatile bool channelB = HIGH; //Channel B set on default
 volatile int count = 0; //counter variable for position 
@@ -13,7 +14,7 @@ float velocity = 0;
 byte msg = 0;
 
 void setup() { //Sets up pins and serial monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(channelAPin,INPUT_PULLUP);
   pinMode(channelBPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(channelAPin), encoderISR, CHANGE); //sets interrupt to happen when channel A changes

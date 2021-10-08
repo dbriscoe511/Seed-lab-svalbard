@@ -1,4 +1,5 @@
 #define PI 3.1415926535897932384626433832795
+#include <Wire.h>
 
 //Pin assignment and global variable instantiation
 const int channelAPin = 2; 
@@ -23,7 +24,7 @@ byte msg =0;
 
 
 void setup() { //Sets up pins and serial monitor
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(channelAPin,INPUT_PULLUP);
   pinMode(channelBPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(channelAPin), encoderISR, CHANGE); //sets interrupt to happen when channel A changes
@@ -39,10 +40,10 @@ void setup() { //Sets up pins and serial monitor
 }
 
 void loop() { //main loop
-  if((millis()-lastTimeMeasured)>10){
+  if((millis()-lastTimeMeasured)>5){
     degree = count/9;
-    velocity = ((count/(3200.0/(2*PI)))-radian)/.01;
-    radian = count/(3200.0/(2*PI));
+    velocity = ((count/3200.0)*2*PI)-radian)/.005;
+    radian = ((count/3200.0)*2*PI);
     voltage = ((PWM/255.0)*7.2);
     
     Serial.print(millis()/1000.0);
