@@ -4,3 +4,5 @@ Team Members:	Daniel Briscoe
 		Kristen Ung
 		Brian "X-Man" Bahr
 		Beau Collins
+
+This repository contains code forr the Colorado school fo mines seed lab class
