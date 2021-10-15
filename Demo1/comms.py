@@ -43,8 +43,12 @@ class comm:
                         raise ValueError("command does not exist") # must be a byte
             self.bus.write_block(self.addr,command,val)         
 
-        def move(self,distance):
+        def move(self,distance): # in 1in incrments
             self.command(DIST,distance)
+        
+        def angle(self,angle):
+            a = angle/4
+            self.command(ANGLE,a)
 
         def r_vel(self,vel):
             self.command(RIGHT_WHEEL_VEL,vel)
