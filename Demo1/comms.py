@@ -11,6 +11,15 @@ import board
 import adafruit_character_lcd.character_lcd_rgb_i2c as chlcd
 import time
 
+SLOW = 20
+NORMAL = 80
+FAST = 150
+
+LEFT_WHEEL_VEL = 0
+RIGHT_WHEEL_VEL = 1
+DIST = 2
+ANGLE = 3
+
 class comm:
         bus = 0
         addr = 0
@@ -27,12 +36,36 @@ class comm:
                 self.lcd.message = "initialized"
                 time.sleep(0.2)
 
+        def command(self,command,val):
+            if val<0 or val>255:
+                        raise ValueError("outside of byte range") # must be a byte
+            if command<0 or command>3:
+                        raise ValueError("command does not exist") # must be a byte
+            self.bus.write_block(self.addr,command,val)         
+
+        def move(self,distance):
+            self.command(DIST,distance)
+
+        def r_vel(self,vel):
+            self.command(RIGHT_WHEEL_VEL,vel)
+
+        def l_vel(self,vel):
+            self.command(LEFT_WHEEL_VEL,vel)
+
+        def vel(self,vel):
+            self.command(LEFT_WHEEL_VEL,vel)
+            self.command(RIGHT_WHEEL_VEL,vel)
+
+        def stop(self):
+            self.command(LEFT_WHEEL_VEL,0)
+            self.command(RIGHT_WHEEL_VEL,0)
+
         def send(self,val):
                 if val<0 or val>255:
                         raise ValueError("outside of byte range") # must be a byte
                 self.bus.write_byte(self.addr,val)
         def read(self):
-                return self.bus.read_byte(self.addr)
+                return self.bus.read_block(self.addr)
         def update_lcd(self,val):
                 self.lcd.clear()
                 self.lcd.message = str(val)
