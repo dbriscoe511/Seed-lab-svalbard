@@ -60,10 +60,7 @@ class comm:
             self.command(LEFT_WHEEL_VEL,0)
             self.command(RIGHT_WHEEL_VEL,0)
 
-        def send(self,val):
-                if val<0 or val>255:
-                        raise ValueError("outside of byte range") # must be a byte
-                self.bus.write_byte(self.addr,val)
+
         def read(self):
                 return self.bus.read_block(self.addr)
         def update_lcd(self,val):
