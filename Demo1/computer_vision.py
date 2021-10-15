@@ -31,7 +31,7 @@ for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True):
     frame = stream.array
     
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower = np.array([70, 50, 50])
+    lower = np.array([50, 50, 50])
     upper = np.array([130, 255, 255])
     
     mask = cv2.inRange(hsv, lower, upper)
@@ -55,6 +55,7 @@ for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True):
     sys.stdout.write(str(angle) + '\n')
     
     cv2.imshow('frame', thresh)
+    cv2.imshow('img', frame)
                               
     if cv2.waitKey(1) == ord('q'):
         break
