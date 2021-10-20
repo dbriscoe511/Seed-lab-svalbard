@@ -16,7 +16,11 @@ def excersize1():
         t_angle = sys.stdin.readline()
         system.update_lcd(str(t_angle))
 
-excersize2(90,5)
-excersize1()
+exr = int(input("what excersize? (1: camera angle test, 2: rotate/drive test)"))
+if exr ==2:
+    #angle(degree), dist
+    excersize2(90,5)
+else:
+    excersize1()
 
 
