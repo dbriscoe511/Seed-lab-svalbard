@@ -35,12 +35,14 @@ float positionForward = 0;
 float positionAngular = 0;
 
 float errorAngular = 0;
-float desiredAngular = PI;
+float desiredAngular = -1.52*PI; //x1.75 if pos   x1.485 if neg
 float integralAngular = 0;
-float KpAngular = 4; //constant for proportional control (volt/radian)
+float KpAngular = 6; //constant for proportional control (volt/radian)
 float KiAngular = 0; //constant for integral control (volt/radian)
 
 int PWM = 255;
+int PWM1 = 0;
+int PWM2 = 0;
 
 
 void setup() { //Sets up pins and serial monitor
@@ -89,14 +91,16 @@ void loop() { //main loop (nothing)
   errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
   PWM = int(errorAngular*17); //converts volts into PWMs (1/2v=17pwm)
 
-  if(PWM>255){ //saturates PWM and caps at 255
-    PWM = 255;
-  } else if (PWM<0){
-    PWM = 0;
+  PWM1 = PWM;
+  PWM2 = (PWM * 18)/17;
+
+  if(abs(PWM2)>255){ //saturates PWM and caps at 255
+    PWM2 = 255;
+    PWM1 = (255 * 17)/18;
   }
 
-  analogWrite(voltageMotor1,abs(PWM)); //writes PWM counts to motor 1
-  analogWrite(voltageMotor2,abs(PWM));  
+  analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
+  analogWrite(voltageMotor2,abs(PWM2));  
   
   Serial.print("velocity1: ");
   Serial.print(velocity1);
