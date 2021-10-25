@@ -21,12 +21,9 @@ Phi_desired = 0;
 % plot(output*14)
 out = sim("camera_1");
 output = out.get("simout1");
-hold on
-plot(Time,Position/20.73)
-plot(output)
+plot
 xlim([0 3]);
-ylim([0 1.25]);
+ylim([0 15]);
 hold off
-% hold off
 
 
