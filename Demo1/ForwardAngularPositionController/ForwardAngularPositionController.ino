@@ -33,13 +33,13 @@ float positionForward = 0;
 float positionAngular = 0;
 
 float errorForward = 0;
-float desiredForward = 36;
+float desiredForward = 40;
 float integralForward = 0;
 float KpForward = 2; //constant for proportional control (volt/radian)
-float KiForward = 0; //constant for integral control (volt/radian)
+float KiForward = 0.01; //constant for integral control (volt/radian)
 
 float errorAngular = 0;
-float desiredAngular = 0.226893;
+float desiredAngular = (2*PI)*(14/360.0);
 float integralAngular = 0;
 float KpAngular = 15; //constant for proportional control (volt/radian)
 float KiAngular = 0.1; //constant for integral control (volt/radian)
@@ -97,6 +97,13 @@ void loop() { //main loop (nothing)
     integralAngular = integralAngular + (errorAngular * timeDelta / 1000000.0); //integral path (rad)
     errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
     PWM = int(errorAngular*52); //converts volts into PWMs (1/2v=17pwm)
+
+    if ((PWM-OldPWM) > 70) {
+      PWM = OldPWM+70;
+    }
+    if ((PWM-OldPWM) < -70){
+      PWM = OldPWM-70;
+    }
     
   } else {
     
@@ -111,13 +118,11 @@ void loop() { //main loop (nothing)
     integralForward = integralForward + (errorForward * timeDelta / 1000000.0); //integral path (rad)
     errorForward = (KpForward*errorForward)+(KiForward*integralForward); //proportional path (volts)
     PWM = int(errorForward*52); //converts volts into PWMs (1/2v=17pwm)
-  }
-  
-  if ((PWM-OldPWM) > 70) {
-    PWM = OldPWM+70;
-  }
-  if ((PWM-OldPWM) < -70){
-    PWM = OldPWM-70;
+
+    if ((PWM-OldPWM) > 70) {
+      PWM = OldPWM+70;
+    }
+    
   }
 
   PWM1 = PWM;
@@ -129,7 +134,21 @@ void loop() { //main loop (nothing)
   }
 
   analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
-  analogWrite(voltageMotor2,abs(PWM2));  
+  analogWrite(voltageMotor2,abs(PWM2));
+
+  Serial.print("velocity1: ");
+  Serial.print(velocity1);
+  Serial.print("\tvelocity2: ");
+  Serial.print(velocity2);
+  Serial.print("\tvelocityForward: ");
+  Serial.print(velocityForward);
+  Serial.print("\tvelocityAngular: ");
+  Serial.println(velocityAngular);
+  Serial.print("positionForward: ");
+  Serial.print(positionForward);
+  Serial.print("\tpositionAngular: ");
+  Serial.println(positionAngular);
+  Serial.println();
 }
 
 void encoder1ISR() { //interrupt
