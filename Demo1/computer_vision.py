@@ -62,6 +62,10 @@ def cv_main(gains):
         
         angle = 27*(locateX - 320)/320    # Finds angle needed to turn
         
+        f = open('coords.txt', 'a')
+        f.write(str(locateX) + ',' + str(locateY) + '\n')
+        
+        #sys.stdout.write(str('%s %s', locateX, locateY))
         sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
         #print(str(angle))
