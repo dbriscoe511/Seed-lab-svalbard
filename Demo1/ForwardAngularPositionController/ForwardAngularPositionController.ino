@@ -1,5 +1,3 @@
-
-
 #define PI 3.1415926535897932384626433832795 //definition for PI constant
 
 //Pin assignment and global variable instantiation
@@ -37,18 +35,21 @@ float positionAngular = 0;
 float errorForward = 0;
 float desiredForward = 36;
 float integralForward = 0;
-float KpForward = 4; //constant for proportional control (volt/radian)
+float KpForward = 2; //constant for proportional control (volt/radian)
 float KiForward = 0; //constant for integral control (volt/radian)
 
 float errorAngular = 0;
-float desiredAngular = PI;
+float desiredAngular = 0.226893;
 float integralAngular = 0;
-float KpAngular = 4; //constant for proportional control (volt/radian)
-float KiAngular = 0; //constant for integral control (volt/radian)
-
-bool turnFlag = 0;
+float KpAngular = 15; //constant for proportional control (volt/radian)
+float KiAngular = 0.1; //constant for integral control (volt/radian)
 
 int PWM = 0;
+
+int OldPWM = 0;
+
+int PWM1 = 0;
+int PWM2 = 0;
 
 void setup() { //Sets up pins and serial monitor
   Serial.begin(9600);
@@ -84,9 +85,8 @@ void loop() { //main loop (nothing)
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0);
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0);
 
-  if (turnFlag == LOW){
-
-    errorAngular = (desiredAngular - positionAngular);
+  if (millis()<2000){
+     errorAngular = (desiredAngular - positionAngular);
     if(errorAngular > 0){
       digitalWrite(signMotor1,HIGH); //sets direction clockwise if the error is positive (its not far enough)
       digitalWrite(signMotor2,HIGH);
@@ -96,16 +96,10 @@ void loop() { //main loop (nothing)
     }
     integralAngular = integralAngular + (errorAngular * timeDelta / 1000000.0); //integral path (rad)
     errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
-    PWM = int(errorAngular*17); //converts volts into PWMs (1/2v=17pwm)
-    if(abs(PWM)>255){ //saturates PWM and caps at 255
-      PWM = 255;
-    }
-    if(errorAngular < .1){
-      turnFlag = HIGH;
-    }
-      
+    PWM = int(errorAngular*52); //converts volts into PWMs (1/2v=17pwm)
+    
   } else {
-
+    
     errorForward = desiredForward - positionForward;
     if(errorForward > 0){
       digitalWrite(signMotor1,HIGH); //sets direction clockwise if the error is positive (its not far enough)
@@ -116,14 +110,26 @@ void loop() { //main loop (nothing)
     }
     integralForward = integralForward + (errorForward * timeDelta / 1000000.0); //integral path (rad)
     errorForward = (KpForward*errorForward)+(KiForward*integralForward); //proportional path (volts)
-    PWM = int(errorForward*17); //converts volts into PWMs (1/2v=17pwm)
-    if(abs(PWM)>255){ //saturates PWM and caps at 255
-      PWM = 255;
-    }
+    PWM = int(errorForward*52); //converts volts into PWMs (1/2v=17pwm)
+  }
   
-  analogWrite(voltageMotor1,abs(PWM)); //writes PWM counts to motor 1
-  analogWrite(voltageMotor2,abs(PWM));  
-  
+  if ((PWM-OldPWM) > 70) {
+    PWM = OldPWM+70;
+  }
+  if ((PWM-OldPWM) < -70){
+    PWM = OldPWM-70;
+  }
+
+  PWM1 = PWM;
+  PWM2 = int((PWM * 19.5)/17);
+
+  if(abs(PWM2)>255){ //saturates PWM and caps at 255
+    PWM2 = 255;
+    PWM1 = int((255 * 17)/19.5);
+  }
+
+  analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
+  analogWrite(voltageMotor2,abs(PWM2));  
 }
 
 void encoder1ISR() { //interrupt

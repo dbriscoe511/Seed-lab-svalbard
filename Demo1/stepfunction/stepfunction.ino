@@ -31,5 +31,5 @@ void loop() {
   digitalWrite(signMotor1,HIGH); //sets direction clockwise if the error is positive (its not far enough)
   digitalWrite(signMotor2,HIGH);
   analogWrite(voltageMotor1,255); //writes PWM counts to motor 1
-  analogWrite(voltageMotor2,255); 
+  //analogWrite(voltageMotor2,255); 
 }

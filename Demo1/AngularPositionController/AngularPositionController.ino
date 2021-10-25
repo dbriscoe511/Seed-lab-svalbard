@@ -1,5 +1,3 @@
-
-
 #define PI 3.1415926535897932384626433832795 //definition for PI constant
 
 //Pin assignment and global variable instantiation
@@ -35,12 +33,15 @@ float positionForward = 0;
 float positionAngular = 0;
 
 float errorAngular = 0;
-float desiredAngular = -1.52*PI; //x1.75 if pos   x1.485 if neg
+float desiredAngular = 0.24434612519895391;
 float integralAngular = 0;
-float KpAngular = 6; //constant for proportional control (volt/radian)
-float KiAngular = 0; //constant for integral control (volt/radian)
+float KpAngular = 15; //constant for proportional control (volt/radian)
+float KiAngular = 0.1; //constant for integral control (volt/radian)
 
 int PWM = 255;
+
+int OldPWM = 0;
+
 int PWM1 = 0;
 int PWM2 = 0;
 
@@ -89,14 +90,21 @@ void loop() { //main loop (nothing)
     }
   integralAngular = integralAngular + (errorAngular * timeDelta / 1000000.0); //integral path (rad)
   errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
-  PWM = int(errorAngular*17); //converts volts into PWMs (1/2v=17pwm)
+  PWM = int(errorAngular*52); //converts volts into PWMs (1/2v=17pwm)
+
+  if ((PWM-OldPWM) > 70) {
+    PWM = OldPWM+70;
+  }
+  if ((PWM-OldPWM) < -70){
+    PWM = OldPWM-70;
+  }
 
   PWM1 = PWM;
-  PWM2 = (PWM * 18)/17;
+  PWM2 = (PWM * 19.5)/17;
 
   if(abs(PWM2)>255){ //saturates PWM and caps at 255
     PWM2 = 255;
-    PWM1 = (255 * 17)/18;
+    PWM1 = (255 * 17)/19.5;
   }
 
   analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
