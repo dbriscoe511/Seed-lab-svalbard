@@ -35,7 +35,7 @@ float positionForward = 0;
 float positionAngular = 0;
 
 float errorForward = 0;
-float desiredForward = 30;
+float desiredForward = 108;
 float integralForward = 0;
 float KpForward = 2; //constant for proportional control (volt/radian)
 float KiForward = 0; //constant for integral control (volt/radian)
@@ -102,11 +102,11 @@ void loop() { //main loop (nothing)
 
   
   PWM1 = PWM;
-  PWM2 = int((PWM * 19.5)/17);
+  PWM2 = int((PWM * 19)/17);
 
   if(abs(PWM2)>255){ //saturates PWM and caps at 255
     PWM2 = 255;
-    PWM1 = int((255 * 17)/19.5);
+    PWM1 = int((255 * 17)/19);
   }
 
   analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1

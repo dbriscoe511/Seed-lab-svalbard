@@ -33,13 +33,13 @@ float positionForward = 0;
 float positionAngular = 0;
 
 float errorForward = 0;
-float desiredForward = 40;
+float desiredForward = 24;
 float integralForward = 0;
 float KpForward = 2; //constant for proportional control (volt/radian)
 float KiForward = 0.01; //constant for integral control (volt/radian)
 
 float errorAngular = 0;
-float desiredAngular = (2*PI)*(14/360.0);
+float desiredAngular = (2*PI)*(243.4/360.0);
 float integralAngular = 0;
 float KpAngular = 15; //constant for proportional control (volt/radian)
 float KiAngular = 0.1; //constant for integral control (volt/radian)
@@ -85,7 +85,7 @@ void loop() { //main loop (nothing)
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0);
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0);
 
-  if (millis()<2000){
+  if (millis()<8000){
      errorAngular = (desiredAngular - positionAngular);
     if(errorAngular > 0){
       digitalWrite(signMotor1,HIGH); //sets direction clockwise if the error is positive (its not far enough)
