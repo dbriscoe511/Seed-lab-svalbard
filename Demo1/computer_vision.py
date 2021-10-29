@@ -6,7 +6,7 @@ import cv2
 import io
 import sys
 
-def camera_setup():
+def camera_setup():     #Function gets auto white balance values to pass to cv_main()
     camera = PiCamera()
     camera.resolution = (640, 480)
     camera.framerate = 50
@@ -24,7 +24,7 @@ def camera_setup():
     return gains
 def cv_main(gains):
     
-    camera = PiCamera()
+    camera = PiCamera()     #Sets up camera
     camera.resolution = (640, 480)
     camera.framerate = 50
     g0 = np.mean(gains[0])
@@ -35,8 +35,8 @@ def cv_main(gains):
     stream = PiRGBArray(camera)
     sleep(0.1)
     
-    for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True):
-        stream.truncate()
+    for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True): 
+        stream.truncate()       #Truncates the video stream to ensure its always the same aspect ratio
         stream.seek(0)
         frame = stream.array
         
@@ -47,7 +47,7 @@ def cv_main(gains):
         mask = cv2.inRange(hsv, lower, upper)
         results = cv2.bitwise_and(frame, frame, mask=mask)
         
-        kernel = np.ones((5,5),np.uint8)
+        kernel = np.ones((5,5),np.uint8)    #Performs morphological transformations to clean up the image
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
         
@@ -66,13 +66,13 @@ def cv_main(gains):
         f.write(str(locateX) + ',' + str(locateY) + '\n')
         
         #sys.stdout.write(str('%s %s', locateX, locateY))
-        sys.stdout.write(str(angle) + '\n')
+        sys.stdout.write(str(angle) + '\n')     #Writes output to console to be picked up from another program.
         sys.stdout.flush()
         #print(str(angle))
-        cv2.imshow('frame', thresh)
+        cv2.imshow('frame', thresh)     #Display both the regular image and the masked one
         cv2.imshow('img', frame)
                                   
-        if cv2.waitKey(1) == ord('q'):
+        if cv2.waitKey(1) == ord('q'):  #Quit when 'q' is pressed
             break
         
     cv2.destroyAllWindows()
