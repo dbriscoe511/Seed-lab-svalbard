@@ -18,3 +18,6 @@ on track for following commands.
 by the motor encoders, and tune the system to ensure the robot performs the desired task.
 
 This folder contains the materials needed for Demo1. 
+Each folder in this demo folder contains an arduino script, which are individually commented.
+The main.py contains the code that needs to be run to perform a comp vision demo,
+the "forwardangularpositioncontroller" contains the code to perform the movement functions needed in the demo
