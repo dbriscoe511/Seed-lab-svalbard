@@ -6,6 +6,20 @@ import cv2
 import io
 import sys
 
+'''
+This script handles a picam and sends its coordonites to a screen
+
+It should be opened as a subprocess to keep the video running,
+ it can be setup and called with the folllowing syntax:
+
+cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
+process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+while process.poll() is None:
+        time.sleep(0.5)
+        angle = process.stdout.readline()
+
+'''
+
 def camera_setup():
     camera = PiCamera()
     camera.resolution = (640, 480)

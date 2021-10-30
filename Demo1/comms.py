@@ -5,6 +5,9 @@ Handles i2c and lcd interfacing.
 this is called by main when data needs to be sent or recived 
 to use, create a comm object, and call it's functions
 
+The command function and it's derivatives are not used in demo 1
+and can be ignored. 
+
 '''
 import smbus2 
 import board
@@ -37,6 +40,9 @@ class comm:
                 time.sleep(0.2)
 
         def command(self,command,val):
+            # not used for this demo. 
+            #sends a mutually agreed upon command between the pi and the arduino,
+            #follwed by a velocity amount
             if val<0 or val>255:
                         raise ValueError("outside of byte range") # must be a byte
             if command<0 or command>3:

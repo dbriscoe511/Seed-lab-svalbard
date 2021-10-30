@@ -6,6 +6,13 @@ import subprocess
 
 system = comms.comm() # initialize i2c and display
 
+''' 
+This scrip initializes a prompt of what excersize to select, followed
+Currently, the movement part of this excersize does not 
+involve communication between processors.
+
+'''
+
 
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 def excersize2(angle,dist):
