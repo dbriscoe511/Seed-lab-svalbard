@@ -20,7 +20,7 @@ while process.poll() is None:
 
 '''
 
-def camera_setup():
+def camera_setup():  #Calculates the white balance to be passed to cv_main()
     camera = PiCamera()
     camera.resolution = (640, 480)
     camera.framerate = 50
@@ -38,7 +38,7 @@ def camera_setup():
     return gains
 def cv_main(gains):
     
-    camera = PiCamera()
+    camera = PiCamera()  #Set up camera with passed values
     camera.resolution = (640, 480)
     camera.framerate = 50
     g0 = np.mean(gains[0])
@@ -50,7 +50,7 @@ def cv_main(gains):
     sleep(0.1)
     
     for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True):
-        stream.truncate()
+        stream.truncate() #Truncates the video to ensure the correct aspect ratio
         stream.seek(0)
         frame = stream.array
         
@@ -59,9 +59,9 @@ def cv_main(gains):
         upper = np.array([130, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
-        results = cv2.bitwise_and(frame, frame, mask=mask)
+        results = cv2.bitwise_and(frame, frame, mask=mask) #Masks image to isolate blue
         
-        kernel = np.ones((5,5),np.uint8)
+        kernel = np.ones((5,5),np.uint8)  #Cleans up masked image with morphological transformations 
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
         
@@ -76,9 +76,8 @@ def cv_main(gains):
         
         angle = 27*(locateX - 320)/320    # Finds angle needed to turn
         
-        sys.stdout.write(str(angle) + '\n')
+        sys.stdout.write(str(angle) + '\n') #Writes angle to console to be read by external program
         sys.stdout.flush()
-        #print(str(angle))
         cv2.imshow('frame', thresh)
         cv2.imshow('img', frame)
                                   
@@ -86,4 +85,3 @@ def cv_main(gains):
             break
         
     cv2.destroyAllWindows()
-    #return(angle)
