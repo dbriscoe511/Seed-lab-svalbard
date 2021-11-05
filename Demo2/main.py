@@ -13,29 +13,65 @@ involve communication between processors.
 
 '''
 
-
+SLOW = 20
+NORMAL = 50
+FAST = 95
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
-def excersize2(angle,dist):
-    time.sleep(8)
-    system.angle(angle)
-    
-    system.move(dist*12)
+
+def test_nocv():
+    send('nan')
+    time.sleep(1)
+    send(10)
+    time.sleep(1)
+    send(-2)
+    time.sleep(1)
+    send('stop')
+    time.sleep(1)
+    send('turn')
+
+
+
+state = 0
+def send(angle):
+    if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
+        state = 1 #do not revert to 0, that is only finding the tape.
+    elif (angle == 'turn'):
+        state = 2
+    elif (angle == 'stop'):
+        state = 3
+        system.r_vel(127)
+        system.l_vel(127)
+
+        
+    if state == 1:
+        system.r_vel(FAST+int(angle)+127)
+        system.l_vel(FAST+int(angle)+127)
+    elif state == 0:
+        system.r_vel(NORMAL+127)
+        system.l_vel(127-NORMAL)
+    if state == 2:
+        system.angle(90)
+
 
 def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    state = 0
     while process.poll() is None:
-        time.sleep(0.5)
         angle = process.stdout.readline()
         angle = angle.decode('utf-8')
         angle.strip('\n')
-        print(angle)
-        system.update_lcd(str(angle))
+        send(angle)
 
-exr = int(input("what excersize? (1: camera angle test, 2 (obsolete): rotate/drive test)"))
+
+        #time.sleep(0.5)
+        print(angle)
+        #system.update_lcd(str(angle))
+
+exr = int(input("what excersize? (1: test no cv, 2: test cv"))
 if exr ==2:
     #angle(degree), dist
-    excersize2(90,5)
+    test_nocv()
 else:
     excersize1()
 
