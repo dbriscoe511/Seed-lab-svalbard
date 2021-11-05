@@ -37,10 +37,6 @@
         state = VELOCITY_CNT;
         r_vel = (c[1]-127)*VELOCITY_MULTIPLIER;
       }
-      else if (c[0] == DIST){ //obsolete?
-        state = DIST_CNT;
-        r_vel = (c[1]-127)*dist_MULTIPLIER;
-      }
       else if (c[0] == ANGLE){
         state = ANGLE_CNT;
         r_vel = (c[1]-127)*ANGLE_MULTIPLIER;
