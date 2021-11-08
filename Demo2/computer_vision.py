@@ -57,24 +57,41 @@ def cv_main(gains):
         
         cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         
-        cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
-        #contours = np.array(contours)
-        M = cv2.moments(contours)
-        if M['m00'] != 0:
-            cX = int(M['m10'] / M['m00'])
-            cY = int(M['m01'] / M['m00'])
+        cX = None
+        cY = None
+        
+        if len(contours) != 0:
+            contours = max(contours, key = cv2.contourArea)
+        
+        if len(contours) != 0:
+            cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
+            #for c in contours:
+            M = cv2.moments(contours)
+            if M['m00'] != 0:
+                cX = int(M['m10'] / M['m00'])
+                cY = int(M['m01'] / M['m00'])
+            
+            if (cX != None or cY != None):
+                cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
+                
+        if cX != None:
+            angle = 27*(cX - 320)/320    # Finds angle needed to turn
         else:
-            cX = 0
-            cY = 0
-        cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
+            angle = 'No line detected'
         
-        angle = 27*(cX - 320)/320    # Finds angle needed to turn
-        
-        f = open('coords.txt', 'a')
-        f.write(str(cX) + ',' + str(cY) + '\n')
-        
-        #sys.stdout.write(str('%s %s', locateX, locateY))
-        sys.stdout.write(str(angle) + '\n')
+        #f = open('coords.txt', 'a')
+        #f.write(str(cX) + ',' + str(cY) + '\n')
+
+        #0 = x angle
+        #1 = y pos
+        if cY != None:
+            if cY > 380:
+                sys.stdout.write('stop\n')
+            else:
+                sys.stdout.write(str(angle) + '\n')
+            
+        else:
+            sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
         #print(str(angle))
         cv2.imshow('frame', smoothed)
