@@ -1,4 +1,5 @@
 import time
+from Demo2.comms import ANGLE
 import comms
 import sys
 import computer_vision as cv
@@ -27,12 +28,13 @@ def test_nocv():
     time.sleep(1)
     send('stop')
     time.sleep(1)
-    send('turn')
+    #send('turn')
 
 
 
 state = 0
 def send(angle):
+    print(angle)
     if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
     elif (angle == 'turn'):
