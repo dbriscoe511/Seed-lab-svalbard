@@ -65,6 +65,8 @@ uint8_t c[10];
 uint8_t state;
 
 //still need to declare states
+#define VELOCITY_CNT 0
+#define ANGLE_CNT 1
 
 
 void setup() {
