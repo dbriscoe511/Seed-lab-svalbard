@@ -20,7 +20,7 @@ FAST = 95
 
 def test_nocv():
     send('nan')
-    time.sleep(1)
+    time.sleep(2)
     send(10)
     time.sleep(1)
     send(-2)
@@ -33,6 +33,8 @@ def test_nocv():
 
 state = 0
 def send(angle):
+    global state
+    print(angle)
     if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
     elif (angle == 'turn'):
@@ -69,7 +71,7 @@ def excersize1():
         #system.update_lcd(str(angle))
 
 exr = int(input("what excersize? (1: test no cv, 2: test cv"))
-if exr ==2:
+if exr ==1:
     #angle(degree), dist
     test_nocv()
 else:

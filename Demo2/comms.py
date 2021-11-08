@@ -47,7 +47,7 @@ class comm:
                         raise ValueError("outside of byte range") # must be a byte
             if command<0 or command>3:
                         raise ValueError("command does not exist") # must be a byte
-            self.bus.write_block(self.addr,command,val)         
+            self.bus.write_i2c_block_data(self.addr,0,[command,val])         
 
         def move(self,distance): # in 1in incrments
             self.command(DIST,distance)
