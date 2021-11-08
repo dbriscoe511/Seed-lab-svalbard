@@ -27,7 +27,7 @@ def test_nocv():
     time.sleep(1)
     send('stop')
     time.sleep(1)
-    send('turn')
+    #send('turn')
 
 
 

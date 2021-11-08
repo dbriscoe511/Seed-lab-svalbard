@@ -40,14 +40,14 @@ float positionAngular = 0; //angular position of robot
 float errorLeftMotor = 0;
 float desiredLeftMotor = 0;
 float integralLeftMotor = 0;
-float KpLeftMotor = 1;
-float KiLeftMotor = 0;
+float KpLeftMotor = .1;
+float KiLeftMotor = 0.003;
 
 float errorRightMotor = 0;
 float desiredRightMotor = 0;
 float integralRightMotor = 0;
-float KpRightMotor = 1;
-float KiRightMotor = 0;
+float KpRightMotor = .1;
+float KiRightMotor = 0.003;
 
 /*
 float errorAngular = 0; //error signal for angular position
@@ -72,7 +72,7 @@ uint8_t state;
 
 
 void setup() {
-  Serial.begin(9600);// start serial for output
+  Serial.begin(115200);// start serial for output
   pinMode(channelA1Pin,INPUT_PULLUP);
   pinMode(channelB1Pin,INPUT_PULLUP);
   pinMode(channelA2Pin,INPUT_PULLUP);
@@ -136,19 +136,23 @@ void loop() {
   analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2 
 
   //prints out data for debugging (optional)
+
+  //the print commands slowed the loop down too much. baud changed and a manual precise delay added
+  delay(50);
+  /*
   Serial.print("velocity1: ");
   Serial.print(velocity1);
   Serial.print("\tvelocity2: ");
   Serial.print(velocity2);
-  Serial.print("\tvelocityForward: ");
-  Serial.print(velocityForward);
-  Serial.print("\tvelocityAngular: ");
-  Serial.println(velocityAngular);
+  Serial.print("\tvelocityleftd: ");
+  Serial.print(desiredLeftMotor);
+  Serial.print("\tvelocityrightd: ");
+  Serial.println(desiredRightMotor);
   Serial.print("positionForward: ");
   Serial.print(positionForward);
   Serial.print("\tpositionAngular: ");
   Serial.println(positionAngular);
-  Serial.println();
+  Serial.println();*/
 }
   
 void receive_e(int events) {
@@ -158,18 +162,23 @@ void receive_e(int events) {
     i++; // byte length of message (a length 1 message in this case is a data request. ignore)
   }
   //may need to disable pwm while these commands are being processed?
-  if (i==2){
-    if (c[0] == LEFT_WHEEL_TARGET){
+  if (i==3){
+    Serial.println("recived command");
+    if (c[1] == LEFT_WHEEL_TARGET){
+      Serial.println("l");
       //state = VELOCITY_CNT;
-      desiredLeftMotor = ((c[1]-127)*(105.0/256));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
+      desiredLeftMotor = ((c[2]-127)*(0.08));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
+      Serial.println(desiredLeftMotor);
       if (desiredLeftMotor>=0){
         digitalWrite(signMotor1,HIGH);
       } else {
         digitalWrite(signMotor1,LOW);
       }
-    } else if (c[0] == RIGHT_WHEEL_TARGET){
+    } else if (c[1] == RIGHT_WHEEL_TARGET){
+      Serial.println("r");
       //state = VELOCITY_CNT;
-      desiredRightMotor = ((c[1]-127)*(105.0/256));
+      desiredRightMotor = ((c[2]-127)*(0.08));
+      Serial.println(desiredRightMotor);
       if (desiredRightMotor>=0){
         digitalWrite(signMotor2,LOW);
       } else {
@@ -179,17 +188,19 @@ void receive_e(int events) {
     //  state = ANGLE_CNT;
     //  desiredAngular = ((c[1]-127)*(105.0/256));
     } else{
-      Serial.println("invalid command")
+      Serial.println("invalid command");
       //print in interupt is bad practice, but it should be fine 
     }
-  } else if (i>1){
-     Serial.println("too long of a data string")
+  } else if (i>2){
+     Serial.println("too long of a data string");
+     Serial.println(i);
   } 
 }
 
-//void sendData() {
-//  Wire.write(arr[2]);
-//}
+void sendData() {
+  //do not comment this out, the wire lib requres a recive event
+  Wire.write(123);
+}
 
 
 void encoder1ISR() { //interrupt for wheel 1 (left)
