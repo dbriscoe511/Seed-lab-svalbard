@@ -2,9 +2,9 @@
 #include <Wire.h>
 
 #define PI 3.1415926535897932384626433832795 //definition for PI constant
-#define LEFT_WHEEL_TARGET = 0
-#define RIGHT_WHEEL_TARGET = 1
-#define ANGLE_TARGET = 3
+#define LEFT_WHEEL_TARGET 0
+#define RIGHT_WHEEL_TARGET 1
+#define ANGLE_TARGET 3
 
 // PIN ASSIGNMENT
 const int powerPin = 11; //pin for an extra Vcc = 5V
@@ -37,14 +37,38 @@ float velocityAngular = 0; //angular velocity of robot
 float positionForward = 0; //forward position of robot
 float positionAngular = 0; //angular position of robot
 
+float errorLeftMotor = 0;
+float desiredLeftMotor = 0;
+float integralLeftMotor = 0;
+float KpLeftMotor = 0;
+float KiLeftMotor = 0;
+
+float errorRightMotor = 0;
+float desiredRightMotor = 0;
+float integralRightMotor = 0;
+float KpRightMotor = 0;
+float KiRightMotor = 0;
+
+float errorAngular = 0; //error signal for angular position
+float desiredAngular = (2*PI)*(243.4/360.0); //desired signal for angular position
+float integralAngular = 0; //integral calc for angular position
+float KpAngular = 15; //constant for proportional control (volt/radian)
+float KiAngular = 0.1; //constant for integral control (volt/radian)
+
+int PWM = 255; //ideal PWM
+int OldPWM = 0; //PWM of last iteration
+int PWM1 = 0; //PWM for left wheel
+int PWM2 = 0; //PWM for right wheel
+
 // I2C VARIABLES
 uint8_t c[10];
 uint8_t state;
 
+//still need to declare states
 
 
 void setup() {
-  Serial.begin(9600);        // start serial for output
+  Serial.begin(9600);// start serial for output
   pinMode(channelA1Pin,INPUT_PULLUP);
   pinMode(channelB1Pin,INPUT_PULLUP);
   pinMode(channelA2Pin,INPUT_PULLUP);
@@ -65,7 +89,7 @@ void setup() {
   
   Wire.begin(4);             // join i2c bus with address #4
   Wire.onReceive(receive_e); // register event
-  Wire.onRequest(sendData);
+//  Wire.onRequest(sendData);
 }
   
 void loop() {
@@ -81,7 +105,58 @@ void loop() {
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
-  
+  if (desiredAngular == 0) {
+
+    errorLeftMotor = (desiredLeftMotor - velocity1);
+    integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
+    errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
+    PWM1 = PWM1+int(errorLeftMotor*17);
+    if(abs(PWM1)>255){ //saturates PWM and caps at 255
+      PWM1 = 255;
+    } else if (PWM1<0){
+      PWM1 = 0;
+    }
+
+    errorRightMotor = (desiredRightMotor - velocity2);
+    integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
+    errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
+    PWM2 = PWM2+int(errorRightMotor*17);
+    if(abs(PWM2)>255){ //saturates PWM and caps at 255
+      PWM2 = 255;
+    } else if (PWM2<0){
+      PWM2 = 0;
+    }
+    
+    
+  } else {
+
+    desiredAngular = positionAngular + desiredAngular;
+    errorAngular = (desiredAngular - positionAngular); //error signal between actual and desired position
+    if(errorAngular > 0){ //sets robot to go clockwise if error is positive
+      digitalWrite(signMotor1,HIGH);
+      digitalWrite(signMotor2,HIGH);
+    } else if (errorAngular < 0){ //sets robot to go counterclockwise if error is negative
+      digitalWrite(signMotor1,LOW);
+      digitalWrite(signMotor2,LOW);
+    }
+    integralAngular = integralAngular + (errorAngular * timeDelta / 1000000.0); //integral path (rad)
+    errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
+    PWM = int(errorAngular*52); //converts volts into PWMs (3/2v=52pwm)
+    //lowpass filter
+    if ((PWM-OldPWM) > 70) { //slows how much PWM can increase by 2v
+      PWM = OldPWM+70;
+    }
+    if ((PWM-OldPWM) < -70){ //slows how much PWM can decrease by 2v 
+      PWM = OldPWM-70;
+    }
+    PWM1 = PWM; //PWM of left wheel
+    PWM2 = (PWM * 19.5)/17; //PWM of right wheel
+    //saturation filter
+    if(abs(PWM2)>255){ //saturates PWM and caps at 255
+      PWM2 = 255;
+      PWM1 = int((255 * 17)/19.5);
+    }
+  }
 }
   
 void receive_e(int events) {
@@ -92,18 +167,16 @@ void receive_e(int events) {
   }
   //may need to disable pwm while these commands are being processed?
   if (i==2){
-    if (c[0] == LEFT_WHEEL_VEL){
+    if (c[0] == LEFT_WHEEL_TARGET){
       state = VELOCITY_CNT;
-      l_vel = ((c[1]-127)*(105.0/256));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
-    }
-    else if (c[0] == RIGHT_WHEEL_VEL){
+      desiredLeftMotor = ((c[1]-127)*(105.0/256));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
+    } else if (c[0] == RIGHT_WHEEL_TARGET){
       state = VELOCITY_CNT;
-      r_vel = ((c[1]-127)*(105.0/256));
-    }
-    else if (c[0] == ANGLE){
+      desiredRightMotor = ((c[1]-127)*(105.0/256));
+    } else if (c[0] == ANGLE_TARGET){
       state = ANGLE_CNT;
-      a_vel = ((c[1]-127)*(105.0/256));
-    } els e{
+      desiredAngular = ((c[1]-127)*(105.0/256));
+    } else{
       Serial.println("invalid command")
       //print in interupt is bad practice, but it should be fine 
     }
