@@ -39,13 +39,13 @@ float desiredVelocity = 7.4;
 float errorLeftMotor = 0;
 float desiredLeftMotor = desiredVelocity;
 float integralLeftMotor = 0;
-float KpLeftMotor = 7;
+float KpLeftMotor = 1;
 float KiLeftMotor = 0;
 
 float errorRightMotor = 0;
 float desiredRightMotor = desiredVelocity;
 float integralRightMotor = 0;
-float KpRightMotor = 7;
+float KpRightMotor = 1;
 float KiRightMotor = 0;
 
 int PWM = 0; //ideal PWM
@@ -94,20 +94,20 @@ void loop() { //main loop (nothing)
   integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
   errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
   PWM1 = PWM1+int(errorLeftMotor*17);
-  if(PWM1>255){ //saturates PWM and caps at 255
+  if(abs(PWM1)>255){ //saturates PWM and caps at 255
     PWM1 = 255;
-  } else if (PWM1<-255){
-      PWM1 = -255;
+  } else if (abs(PWM1)<0){
+      PWM1 = 0;
   }
 
   errorRightMotor = (desiredRightMotor - velocity2);
   integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
   errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
   PWM2 = PWM2+int(errorRightMotor*17);
-  if(PWM2>255){ //saturates PWM and caps at 255
+  if(abs(PWM2)>255){ //saturates PWM and caps at 255
     PWM2 = 255;
-  } else if (PWM2<-255){
-    PWM2 = -255;
+  } else if (abs(PWM2)<0){
+    PWM2 = 0;
   }
 
   /*

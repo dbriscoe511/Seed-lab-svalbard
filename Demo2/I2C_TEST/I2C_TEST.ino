@@ -40,23 +40,25 @@ float positionAngular = 0; //angular position of robot
 float errorLeftMotor = 0;
 float desiredLeftMotor = 0;
 float integralLeftMotor = 0;
-float KpLeftMotor = 0;
+float KpLeftMotor = 1;
 float KiLeftMotor = 0;
 
 float errorRightMotor = 0;
 float desiredRightMotor = 0;
 float integralRightMotor = 0;
-float KpRightMotor = 0;
+float KpRightMotor = 1;
 float KiRightMotor = 0;
 
+/*
 float errorAngular = 0; //error signal for angular position
 float desiredAngular = (2*PI)*(243.4/360.0); //desired signal for angular position
 float integralAngular = 0; //integral calc for angular position
 float KpAngular = 15; //constant for proportional control (volt/radian)
 float KiAngular = 0.1; //constant for integral control (volt/radian)
+*/
 
-int PWM = 255; //ideal PWM
-int OldPWM = 0; //PWM of last iteration
+//int PWM = 255; //ideal PWM
+//int OldPWM = 0; //PWM of last iteration
 int PWM1 = 0; //PWM for left wheel
 int PWM2 = 0; //PWM for right wheel
 
@@ -107,58 +109,46 @@ void loop() {
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
-  if (desiredAngular == 0) {
+  digitalWrite(signMotor1,HIGH);
+  digitalWrite(signMotor2,LOW);
 
-    errorLeftMotor = (desiredLeftMotor - velocity1);
-    integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
-    errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
-    PWM1 = PWM1+int(errorLeftMotor*17);
-    if(abs(PWM1)>255){ //saturates PWM and caps at 255
-      PWM1 = 255;
-    } else if (PWM1<0){
+  errorLeftMotor = (desiredLeftMotor - velocity1);
+  integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
+  PWM1 = PWM1+int(errorLeftMotor*17);
+  if(abs(PWM1)>255){ //saturates PWM and caps at 255
+    PWM1 = 255;
+  } else if (abs(PWM1)<0){
       PWM1 = 0;
-    }
-
-    errorRightMotor = (desiredRightMotor - velocity2);
-    integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
-    errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
-    PWM2 = PWM2+int(errorRightMotor*17);
-    if(abs(PWM2)>255){ //saturates PWM and caps at 255
-      PWM2 = 255;
-    } else if (PWM2<0){
-      PWM2 = 0;
-    }
-    
-    
-  } else {
-
-    desiredAngular = positionAngular + desiredAngular;
-    errorAngular = (desiredAngular - positionAngular); //error signal between actual and desired position
-    if(errorAngular > 0){ //sets robot to go clockwise if error is positive
-      digitalWrite(signMotor1,HIGH);
-      digitalWrite(signMotor2,HIGH);
-    } else if (errorAngular < 0){ //sets robot to go counterclockwise if error is negative
-      digitalWrite(signMotor1,LOW);
-      digitalWrite(signMotor2,LOW);
-    }
-    integralAngular = integralAngular + (errorAngular * timeDelta / 1000000.0); //integral path (rad)
-    errorAngular = (KpAngular*errorAngular)+(KiAngular*integralAngular); //proportional path (volts)
-    PWM = int(errorAngular*52); //converts volts into PWMs (3/2v=52pwm)
-    //lowpass filter
-    if ((PWM-OldPWM) > 70) { //slows how much PWM can increase by 2v
-      PWM = OldPWM+70;
-    }
-    if ((PWM-OldPWM) < -70){ //slows how much PWM can decrease by 2v 
-      PWM = OldPWM-70;
-    }
-    PWM1 = PWM; //PWM of left wheel
-    PWM2 = (PWM * 19.5)/17; //PWM of right wheel
-    //saturation filter
-    if(abs(PWM2)>255){ //saturates PWM and caps at 255
-      PWM2 = 255;
-      PWM1 = int((255 * 17)/19.5);
-    }
   }
+
+  errorRightMotor = (desiredRightMotor - velocity2);
+  integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
+  PWM2 = PWM2+int(errorRightMotor*17);
+  if(abs(PWM2)>255){ //saturates PWM and caps at 255
+    PWM2 = 255;
+  } else if (abs(PWM2)<0){
+    PWM2 = 0;
+  }
+
+  analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
+  analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2 
+
+  //prints out data for debugging (optional)
+  Serial.print("velocity1: ");
+  Serial.print(velocity1);
+  Serial.print("\tvelocity2: ");
+  Serial.print(velocity2);
+  Serial.print("\tvelocityForward: ");
+  Serial.print(velocityForward);
+  Serial.print("\tvelocityAngular: ");
+  Serial.println(velocityAngular);
+  Serial.print("positionForward: ");
+  Serial.print(positionForward);
+  Serial.print("\tpositionAngular: ");
+  Serial.println(positionAngular);
+  Serial.println();
 }
   
 void receive_e(int events) {
@@ -170,14 +160,24 @@ void receive_e(int events) {
   //may need to disable pwm while these commands are being processed?
   if (i==2){
     if (c[0] == LEFT_WHEEL_TARGET){
-      state = VELOCITY_CNT;
+      //state = VELOCITY_CNT;
       desiredLeftMotor = ((c[1]-127)*(105.0/256));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
+      if (desiredLeftMotor>=0){
+        digitalWrite(signMotor1,HIGH);
+      } else {
+        digitalWrite(signMotor1,LOW);
+      }
     } else if (c[0] == RIGHT_WHEEL_TARGET){
-      state = VELOCITY_CNT;
+      //state = VELOCITY_CNT;
       desiredRightMotor = ((c[1]-127)*(105.0/256));
-    } else if (c[0] == ANGLE_TARGET){
-      state = ANGLE_CNT;
-      desiredAngular = ((c[1]-127)*(105.0/256));
+      if (desiredRightMotor>=0){
+        digitalWrite(signMotor2,LOW);
+      } else {
+        digitalWrite(signMotor2,HIGH);
+      }
+    //} else if (c[0] == ANGLE_TARGET){
+    //  state = ANGLE_CNT;
+    //  desiredAngular = ((c[1]-127)*(105.0/256));
     } else{
       Serial.println("invalid command")
       //print in interupt is bad practice, but it should be fine 

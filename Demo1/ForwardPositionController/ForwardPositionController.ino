@@ -35,7 +35,7 @@ float positionForward = 0; //forward position of robot
 float positionAngular = 0; //angular position of robot
 
 float errorForward = 0; //error signal for forward position
-float desiredForward = 108; //desired signal for forward position
+float desiredForward = 36; //desired signal for forward position
 float integralForward = 0; //integral calc for forward position
 float KpForward = 2; //constant for proportional control (volt/radian)
 float KiForward = 0; //constant for integral control (volt/radian)
@@ -70,12 +70,12 @@ void loop() { //main loop (nothing)
   timeDelta = micros()-timeMain; //time in between loops
   timeMain = micros(); //time of current loop
 
-  velocity1 = (count1*2*PI*1000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 1
+  velocity1 = (count1*2*PI*3000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 1
   count1=0; //resets counts of wheel 1
-  velocity2 = (count2*2*PI*1000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 2
+  velocity2 = (count2*2*PI*3000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 2
   count2=0; //resets counts of wheel 1
-  velocityForward = (velocity1+velocity2)*(3.0/2.0); //forward velocity of robot
-  velocityAngular = (velocity1-velocity2)*(3.0/11.0); //angular velocity of robot
+  velocityForward = (velocity1+velocity2)*(1/2.0); //forward velocity of robot
+  velocityAngular = (velocity1-velocity2)*(1/11.0); //angular velocity of robot
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
