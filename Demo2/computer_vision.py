@@ -41,7 +41,7 @@ def cv_main(gains):
         frame = stream.array
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower = np.array([50, 50, 50])
+        lower = np.array([30, 50, 50])
         upper = np.array([130, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
@@ -51,9 +51,13 @@ def cv_main(gains):
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
         
+        smoothed = smoothed[300:480, 0:640]
+        
         grayscale = cv2.cvtColor(smoothed, cv2.COLOR_BGR2GRAY)     # Converts to grayscale
         
         ret,thresh = cv2.threshold(grayscale,50,255,cv2.THRESH_BINARY)   # Performs thresholding
+        
+        
         
         cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         
@@ -85,7 +89,7 @@ def cv_main(gains):
         #0 = x angle
         #1 = y pos
         if cY != None:
-            if cY > 380:
+            if cY > 460:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')
