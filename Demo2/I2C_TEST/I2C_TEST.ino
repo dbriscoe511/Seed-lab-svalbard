@@ -65,10 +65,13 @@ int PWM2 = 0; //PWM for right wheel
 // I2C VARIABLES
 uint8_t c[10];
 uint8_t state;
+uint8_t on;
 
 //still need to declare states
 #define VELOCITY_CNT 0
 #define ANGLE_CNT 1
+#define SHUTDOWN 4
+#define POWERON 5
 
 
 void setup() {
@@ -94,6 +97,7 @@ void setup() {
   Wire.begin(4);             // join i2c bus with address #4
   Wire.onReceive(receive_e); // register event
 //  Wire.onRequest(sendData);
+
 }
   
 void loop() {
@@ -131,7 +135,7 @@ void loop() {
   } else if (abs(PWM2)<0){
     PWM2 = 0;
   }
-
+  if
   analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
   analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2 
 

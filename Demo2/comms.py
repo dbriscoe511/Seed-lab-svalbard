@@ -22,6 +22,7 @@ LEFT_WHEEL_VEL = 0
 RIGHT_WHEEL_VEL = 1
 DIST = 2
 ANGLE = 3
+SHUTDOWN = 4
 
 class comm:
         bus = 0
@@ -58,6 +59,9 @@ class comm:
         def angle(self,angle):
             a = angle/4
             self.command(ANGLE,a)
+            
+        def shutdown_motors():
+            self.command(SHUTDOWN,0)
 
         def r_vel(self,vel):
             self.command(RIGHT_WHEEL_VEL,vel)
