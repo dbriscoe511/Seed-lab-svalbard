@@ -13,14 +13,15 @@ involve communication between processors.
 
 '''
 
-SLOW = 20
-NORMAL = 45
+SLOW = 5
+NORMAL = 10
 FAST = 30
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 
 def test_nocv():
     time.sleep(1)
     system.update_lcd("cal")
+    system.power_on()
     send('nan')
     time.sleep(3)
     send(10)
@@ -35,10 +36,12 @@ def test_nocv():
 
 
 
+
 state = 0
 def send(angle):
     global state
     print(angle)
+    print(state)
     
     if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
@@ -55,13 +58,13 @@ def send(angle):
         system.shutdown_motors()
         system.update_lcd("powering down")
 
-    prop = 0.02   
+    prop = 0.05   
     if state == 1:
         system.r_vel(FAST+int(angle*prop)+127)
         system.l_vel(FAST-int(angle*prop)+127)
     elif state == 0:
-        system.r_vel(NORMAL+127)
-        system.l_vel(127-NORMAL)
+        system.r_vel(FAST+127)
+        system.l_vel(127-FAST)
         system.update_lcd("finding")
     if state == 2:
         system.angle(90)
@@ -82,7 +85,7 @@ def excersize1():
         print(angle)
         #system.update_lcd(str(angle))
 
-exr = int(input("what excersize? (1: test no cv, 2: test cv"))
+exr = int(input("what excersize? (1: test no cv, 2: test cv\n"))
 if exr ==1:
     #angle(degree), dist
     test_nocv()

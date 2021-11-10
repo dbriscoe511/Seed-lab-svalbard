@@ -142,7 +142,7 @@ void loop() {
     analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
     analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2
   } else {
-    analogWrite(voltageMotor1,0)); //writes 0 to motors
+    analogWrite(voltageMotor1,0); //writes 0 to motors
     analogWrite(voltageMotor2,0);
 
   }
@@ -204,10 +204,10 @@ void receive_e(int events) {
     //  state = ANGLE_CNT;
     //  desiredAngular = ((c[1]-127)*(105.0/256));
     } else if (c[1] == SHUTDOWN) {
-      ON = 0
+      on = 0;
     }
     else if (c[1] == POWERON) {
-      ON = 1
+      on = 1;
     }
       else{
       Serial.println("invalid command");
