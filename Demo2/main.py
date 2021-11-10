@@ -22,7 +22,7 @@ def test_nocv():
     time.sleep(1)
     system.update_lcd("cal")
     system.power_on()
-    send('nan')
+    send('No line detected')
     time.sleep(3)
     send(10)
     time.sleep(1)
@@ -43,7 +43,7 @@ def send(angle):
     print(angle)
     print(state)
     
-    if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
+    if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
     elif (angle == 'turn'):
@@ -60,6 +60,7 @@ def send(angle):
 
     prop = 0.05   
     if state == 1:
+        angle = float(angle)
         system.r_vel(FAST+int(angle*prop)+127)
         system.l_vel(FAST-int(angle*prop)+127)
     elif state == 0:
@@ -74,18 +75,19 @@ def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     state = 0
+    system.power_on()
     while process.poll() is None:
         angle = process.stdout.readline()
         angle = angle.decode('utf-8')
-        angle.strip('\n')
+        angle = angle.strip('\n')
+        print(angle)
         send(angle)
 
 
         #time.sleep(0.5)
-        print(angle)
         #system.update_lcd(str(angle))
 
-exr = int(input("what excersize? (1: test no cv, 2: test cv\n"))
+exr = int(input("what excersize?\n1: test no cv\n2: test cv\n"))
 if exr ==1:
     #angle(degree), dist
     test_nocv()
