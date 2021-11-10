@@ -19,6 +19,8 @@ FAST = 30
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 
 def test_nocv():
+    time.sleep(1)
+    system.update_lcd("cal")
     send('nan')
     time.sleep(3)
     send(10)
@@ -37,24 +39,30 @@ state = 0
 def send(angle):
     global state
     print(angle)
+    
     if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
+        system.update_lcd("tracking")
     elif (angle == 'turn'):
         state = 2
+        system.update_lcd("turning 90")
     elif (angle == 'stop'):
+        system.update_lcd("stopping")
         state = 3
         system.r_vel(127)
         system.l_vel(127)
         time.sleep(0.5)
         system.shutdown_motors()
+        system.update_lcd("powering down")
 
-    prop = 0.05   
+    prop = 0.02   
     if state == 1:
         system.r_vel(FAST+int(angle*prop)+127)
         system.l_vel(FAST-int(angle*prop)+127)
     elif state == 0:
         system.r_vel(NORMAL+127)
         system.l_vel(127-NORMAL)
+        system.update_lcd("finding")
     if state == 2:
         system.angle(90)
 

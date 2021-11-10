@@ -5,6 +5,8 @@
 #define LEFT_WHEEL_TARGET 0
 #define RIGHT_WHEEL_TARGET 1
 #define ANGLE_TARGET 3
+#define SHUTDOWN 4
+#define POWERON 5
 
 // PIN ASSIGNMENT
 const int powerPin = 11; //pin for an extra Vcc = 5V
@@ -70,8 +72,7 @@ uint8_t on;
 //still need to declare states
 #define VELOCITY_CNT 0
 #define ANGLE_CNT 1
-#define SHUTDOWN 4
-#define POWERON 5
+
 
 
 void setup() {
@@ -96,6 +97,8 @@ void setup() {
   
   Wire.begin(4);             // join i2c bus with address #4
   Wire.onReceive(receive_e); // register event
+
+  on = 0;
 //  Wire.onRequest(sendData);
 
 }
@@ -135,9 +138,14 @@ void loop() {
   } else if (abs(PWM2)<0){
     PWM2 = 0;
   }
-  if
-  analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
-  analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2 
+  if(on){
+    analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
+    analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2
+  } else {
+    analogWrite(voltageMotor1,0)); //writes 0 to motors
+    analogWrite(voltageMotor2,0);
+
+  }
 
   //prints out data for debugging (optional)
 
@@ -191,11 +199,17 @@ void receive_e(int events) {
       } else {
         digitalWrite(signMotor2,HIGH);
       }
-      
+
     //} else if (c[0] == ANGLE_TARGET){
     //  state = ANGLE_CNT;
     //  desiredAngular = ((c[1]-127)*(105.0/256));
-    } else{
+    } else if (c[1] == SHUTDOWN) {
+      ON = 0
+    }
+    else if (c[1] == POWERON) {
+      ON = 1
+    }
+      else{
       Serial.println("invalid command");
       //print in interupt is bad practice, but it should be fine 
     }
