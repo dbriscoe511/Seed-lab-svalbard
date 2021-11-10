@@ -9,7 +9,7 @@ import sys
 def camera_setup():
     camera = PiCamera()
     camera.resolution = (640, 480)
-    camera.framerate = 50
+    camera.framerate = 15
 
     gains = []
     camera.start_preview()
@@ -55,21 +55,29 @@ def cv_main(gains):
         
         ret,thresh = cv2.threshold(grayscale,50,255,cv2.THRESH_BINARY)   # Performs thresholding
         
-        arr = np.array(thresh)       # Converts threshold to numPy
-        arr = np.nonzero(arr)        # Nonzeros the numPy array
-        locateX = np.mean(arr[1])    # Finds center of marker
-        locateY = np.mean(arr[0])
+        cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
         
-        angle = 27*(locateX - 320)/320    # Finds angle needed to turn
+        cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
+        #contours = np.array(contours)
+        M = cv2.moments(contours)
+        if M['m00'] != 0:
+            cX = int(M['m10'] / M['m00'])
+            cY = int(M['m01'] / M['m00'])
+        else:
+            cX = 0
+            cY = 0
+        cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
+        
+        angle = 27*(cX - 320)/320    # Finds angle needed to turn
         
         f = open('coords.txt', 'a')
-        f.write(str(locateX) + ',' + str(locateY) + '\n')
+        f.write(str(cX) + ',' + str(cY) + '\n')
         
         #sys.stdout.write(str('%s %s', locateX, locateY))
         sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
         #print(str(angle))
-        cv2.imshow('frame', thresh)
+        cv2.imshow('frame', smoothed)
         cv2.imshow('img', frame)
                                   
         if cv2.waitKey(1) == ord('q'):

@@ -89,7 +89,7 @@ def cv_main(gains):
         #0 = x angle
         #1 = y pos
         if cY != None:
-            if cY > 460:
+            if cY > 170:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')
@@ -100,7 +100,7 @@ def cv_main(gains):
         #print(str(angle))
         cv2.imshow('frame', smoothed)
         cv2.imshow('img', frame)
-        cv2.imshow('thresh', thresh)
+        #cv2.imshow('thresh', thresh)
                                   
         if cv2.waitKey(1) == ord('q'):
             break
