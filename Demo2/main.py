@@ -15,17 +15,19 @@ involve communication between processors.
 '''
 
 SLOW = 20
-NORMAL = 50
-FAST = 95
+NORMAL = 45
+FAST = 80
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 
 def test_nocv():
     send('nan')
-    time.sleep(1)
+    time.sleep(3)
     send(10)
     time.sleep(1)
     send(-2)
     time.sleep(1)
+    send(0)
+    time.sleep(3)
     send('stop')
     time.sleep(1)
     #send('turn')
@@ -34,6 +36,7 @@ def test_nocv():
 
 state = 0
 def send(angle):
+    global state
     print(angle)
     if (not angle == 'nan' and not angle == 'turn' and not angle == 'stop'):
         state = 1 #do not revert to 0, that is only finding the tape.
@@ -44,10 +47,10 @@ def send(angle):
         system.r_vel(127)
         system.l_vel(127)
 
-        
+    prop = 0.5    
     if state == 1:
-        system.r_vel(FAST+int(angle)+127)
-        system.l_vel(FAST+int(angle)+127)
+        system.r_vel(FAST+int(angle)*prop+127)
+        system.l_vel(FAST-int(angle)*prop+127)
     elif state == 0:
         system.r_vel(NORMAL+127)
         system.l_vel(127-NORMAL)
@@ -71,7 +74,7 @@ def excersize1():
         #system.update_lcd(str(angle))
 
 exr = int(input("what excersize? (1: test no cv, 2: test cv"))
-if exr ==2:
+if exr ==1:
     #angle(degree), dist
     test_nocv()
 else:
