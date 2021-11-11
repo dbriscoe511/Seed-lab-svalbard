@@ -28,9 +28,9 @@ def test_nocv():
         send('No line detected')
         time.sleep(3)
         send(10)
-        time.sleep(3)
+        time.sleep(5)
         send(-2)
-        time.sleep(1)
+        time.sleep(0.5)
         send(0)
         time.sleep(0)
         send('stop')
@@ -64,7 +64,7 @@ def send(angle):
    # else:
        # state = 0
 
-    prop = 0.1 
+    prop = 0.4 
     if state == 1:
         #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
