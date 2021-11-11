@@ -55,7 +55,7 @@ class comm:
                 self.bus.write_i2c_block_data(self.addr,0,[command,val])
             except:
                 print("IO error")
-            time.sleep(0.1)
+            time.sleep(0.001)
 
         def move(self,distance): # in 1in incrments
             self.command(DIST,distance)

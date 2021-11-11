@@ -64,20 +64,29 @@ def cv_main(gains):
         cX = None
         cY = None
         
+        
+        
         if len(contours) != 0:
             contours = max(contours, key = cv2.contourArea)
         
         if len(contours) != 0:
             cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
             #for c in contours:
+            cY = np.amin(contours, out=cY)
+            cX = np.amin(contours, out=cX)
+            cY = min(cY, cX)
+            #print('cY: ' + str(cY))
+            contours = contours[cY:cY+30, 0:640]
+            #cv2.drawContours(smoothed, contours, -1, (0, 0, 255), 2)
             M = cv2.moments(contours)
             if M['m00'] != 0:
                 cX = int(M['m10'] / M['m00'])
-                cY = int(M['m01'] / M['m00'])
-               #np.amin(contours, out=cY)
+                #cY = int(M['m01'] / M['m00'])
+                
+                
                 #print(cY)
             
-            if (cX != None or cY != None):
+            if (cX == int and cY == int):
                 cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
                 
         if cX != None:
@@ -92,7 +101,7 @@ def cv_main(gains):
         #1 = y pos
         #angle = angle * -1
         if cY != None:
-            if cY > 470:
+            if cY > 200:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')

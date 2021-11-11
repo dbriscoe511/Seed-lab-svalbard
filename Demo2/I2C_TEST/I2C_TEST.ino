@@ -123,8 +123,8 @@ void loop() {
   integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
   errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
   PWM1 = PWM1+int(errorLeftMotor*17);
-  if(abs(PWM1)>200){ //saturates PWM and caps at 255
-    PWM1 = 200;
+  if(abs(PWM1)>100){ //saturates PWM and caps at 255
+    PWM1 = 100;
   } else if (abs(PWM1)<0){
       PWM1 = 0;
   }
@@ -133,8 +133,8 @@ void loop() {
   integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
   errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
   PWM2 = PWM2+int(errorRightMotor*17);
-  if(abs(PWM2)>200){ //saturates PWM and caps at 255
-    PWM2 = 200;
+  if(abs(PWM2)>100){ //saturates PWM and caps at 255
+    PWM2 = 100;
   } else if (abs(PWM2)<0){
     PWM2 = 0;
   }
@@ -175,12 +175,12 @@ void receive_e(int events) {
   }
   //may need to disable pwm while these commands are being processed?
   if (i==3){
-    Serial.println("recived command");
+    //Serial.println("recived command");
     if (c[1] == LEFT_WHEEL_TARGET){
-      Serial.println("l");
+      //Serial.println("l");
       //state = VELOCITY_CNT;
       desiredLeftMotor = ((c[2]-127)*(0.08));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
-      Serial.println(desiredLeftMotor);
+      //Serial.println(desiredLeftMotor);
 
       if (desiredLeftMotor>=0){
         digitalWrite(signMotor1,HIGH);
@@ -189,11 +189,11 @@ void receive_e(int events) {
       }
 
     } else if (c[1] == RIGHT_WHEEL_TARGET){
-      Serial.println("r");
+      //Serial.println("r");
       //state = VELOCITY_CNT;
       desiredRightMotor = ((c[2]-127)*(0.08));
 
-      Serial.println(desiredRightMotor);
+     // Serial.println(desiredRightMotor);
       if (desiredRightMotor>=0){
         digitalWrite(signMotor2,LOW);
       } else {
@@ -214,18 +214,18 @@ void receive_e(int events) {
       integralRightMotor = 0;
     }
       else{
-      Serial.println("invalid command");
+      //Serial.println("invalid command");
       //print in interupt is bad practice, but it should be fine 
     }
   } else if (i>2){
-     Serial.println("too long of a data string");
-     Serial.println(i);
+     //Serial.println("too long of a data string");
+    // Serial.println(i);
   } 
 }
 
 void sendData() {
   //do not comment this out, the wire lib requres a recive event
-  Wire.write(123);
+  //Wire.write(123);
 }
 
 
