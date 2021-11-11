@@ -67,12 +67,12 @@ def send(angle):
         #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
             angle = float(angle)
-            print(NORMAL+int(angle*prop)+127, NORMAL-int(angle*prop)+127)
-            system.r_vel(NORMAL+int(angle*prop)+127)
-            system.l_vel(NORMAL-int(angle*prop)+127)
+            print(FAST+int(angle*prop)+127, NORMAL-int(angle*prop)+127)
+            system.r_vel(FAST+int(angle*prop)+127)
+            system.l_vel(FAST-int(angle*prop)+127)
     elif state == 0:
-        system.r_vel(FAST+127)
-        system.l_vel(127-FAST)
+        system.r_vel(NORMAL+127)
+        system.l_vel(127-NORMAL)
         system.update_lcd("finding")
     if state == 2:
         system.angle(90)
