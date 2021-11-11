@@ -51,7 +51,10 @@ class comm:
                         raise ValueError("command does not exist") # must be a byte
             print(self.addr)
             print([command,val])
-            self.bus.write_i2c_block_data(self.addr,0,[command,val])
+            try:
+                self.bus.write_i2c_block_data(self.addr,0,[command,val])
+            except:
+                print("IO error")
             time.sleep(0.1)
 
         def move(self,distance): # in 1in incrments

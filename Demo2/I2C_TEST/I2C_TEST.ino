@@ -43,13 +43,13 @@ float errorLeftMotor = 0;
 float desiredLeftMotor = 0;
 float integralLeftMotor = 0;
 float KpLeftMotor = .2;
-float KiLeftMotor = 0.003;
+float KiLeftMotor = 0.00;
 
 float errorRightMotor = 0;
 float desiredRightMotor = 0;
 float integralRightMotor = 0;
 float KpRightMotor = .2;
-float KiRightMotor = 0.003;
+float KiRightMotor = 0.00;
 
 /*
 float errorAngular = 0; //error signal for angular position
