@@ -15,7 +15,7 @@ involve communication between processors.
 
 SLOW = 5
 NORMAL = 10
-FAST = 30
+FAST = 40
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 
 def test_nocv():
@@ -43,7 +43,7 @@ def send(angle):
     print(angle)
     print(state)
     
-    if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop'):
+    if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
     elif (angle == 'turn'):
@@ -57,12 +57,18 @@ def send(angle):
         time.sleep(0.5)
         system.shutdown_motors()
         system.update_lcd("powering down")
+        exit(0)
+   # else:
+       # state = 0
 
-    prop = 0.05   
+    prop = 0.4 
     if state == 1:
-        angle = float(angle)
-        system.r_vel(FAST+int(angle*prop)+127)
-        system.l_vel(FAST-int(angle*prop)+127)
+        #print('ang:' + angle)
+        if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
+            angle = float(angle)
+            print(NORMAL+int(angle*prop)+127, NORMAL-int(angle*prop)+127)
+            system.r_vel(NORMAL+int(angle*prop)+127)
+            system.l_vel(NORMAL-int(angle*prop)+127)
     elif state == 0:
         system.r_vel(FAST+127)
         system.l_vel(127-FAST)
@@ -75,12 +81,14 @@ def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     state = 0
+    system.shutdown_motors()
+    time.sleep(1)
     system.power_on()
     while process.poll() is None:
         angle = process.stdout.readline()
         angle = angle.decode('utf-8')
         angle = angle.strip('\n')
-        print(angle)
+        #print(angle)
         send(angle)
 
 

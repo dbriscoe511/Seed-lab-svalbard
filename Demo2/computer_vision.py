@@ -9,7 +9,7 @@ import sys
 def camera_setup():
     camera = PiCamera()
     camera.resolution = (640, 480)
-    camera.framerate = 15
+    camera.framerate = 60
 
     gains = []
     camera.start_preview()
@@ -51,11 +51,11 @@ def cv_main(gains):
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
         #smoothed = cv2.dilate(smoothed, kernel, iterations=3)
-        smoothed = smoothed[300:480, 0:640]
+        smoothed = smoothed[0:480, 0:640]
         
         grayscale = cv2.cvtColor(smoothed, cv2.COLOR_BGR2GRAY)     # Converts to grayscale
         
-        ret,thresh = cv2.threshold(grayscale,0,255,cv2.THRESH_BINARY)   # Performs thresholding
+        ret,thresh = cv2.threshold(grayscale,20,255,cv2.THRESH_BINARY)   # Performs thresholding
         
         
         
@@ -73,7 +73,8 @@ def cv_main(gains):
             M = cv2.moments(contours)
             if M['m00'] != 0:
                 cX = int(M['m10'] / M['m00'])
-                cY = int(M['m01'] / M['m00'])
+                #cY = int(M['m01'] / M['m00'])
+                cY = max(contours[0])
             
             if (cX != None or cY != None):
                 cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
@@ -88,8 +89,9 @@ def cv_main(gains):
 
         #0 = x angle
         #1 = y pos
+        #angle = angle * -1
         if cY != None:
-            if cY > 170:
+            if cY > 470:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')
@@ -98,7 +100,7 @@ def cv_main(gains):
             sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
         #print(str(angle))
-        #cv2.imshow('frame', smoothed)
+        cv2.imshow('frame', smoothed)
         #cv2.imshow('img', frame)
         #cv2.imshow('thresh', thresh)
                                   
