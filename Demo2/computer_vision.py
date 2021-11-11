@@ -73,8 +73,9 @@ def cv_main(gains):
             M = cv2.moments(contours)
             if M['m00'] != 0:
                 cX = int(M['m10'] / M['m00'])
-                #cY = int(M['m01'] / M['m00'])
-                cY = max(contours[0])
+                cY = int(M['m01'] / M['m00'])
+               #np.amin(contours, out=cY)
+                #print(cY)
             
             if (cX != None or cY != None):
                 cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))

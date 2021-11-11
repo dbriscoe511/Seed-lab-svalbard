@@ -49,7 +49,7 @@ def send(angle):
     if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
-    elif (angle == 'turn'): #unused right now
+    elif (angle == 'turn'):
         state = 2
         system.update_lcd("turning 90")
     elif (angle == 'stop'):
@@ -60,9 +60,9 @@ def send(angle):
         time.sleep(0.5)
         system.shutdown_motors()
         system.update_lcd("powering down")
-        #exit(0)
-   # else:
-       # state = 0
+        exit(0)
+    else:
+        state = 0
 
     prop = 0.8 
     if state == 1:
@@ -70,9 +70,9 @@ def send(angle):
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
             angle = float(angle)
             print('state = 1 (track)')
-            print(FAST+int(angle*prop)+127, NORMAL-int(angle*prop)+127)
-            system.r_vel(FAST+int(angle*prop)+127)
-            system.l_vel(FAST-int(angle*prop)+127)
+            print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
+            system.r_vel(FAST-int(angle*prop)+127)
+            system.l_vel(FAST+int(angle*prop)+127)
     elif state == 0:
         print('state = 0 (find)')
         system.r_vel(NORMAL+127)
@@ -85,10 +85,11 @@ def send(angle):
 def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    global state 
+    global state
     state = 0
     system.shutdown_motors()
-    time.sleep(1)
+    system.update_lcd("sleeping")
+    time.sleep(2)
     system.power_on()
     while process.poll() is None:
         angle = process.stdout.readline()
