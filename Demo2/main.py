@@ -17,9 +17,11 @@ SLOW = 5
 NORMAL = 10
 FAST = 40
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
-
+state = 0
 def test_nocv():
+    global state
     while(True):
+        state = 0
         time.sleep(1)
         system.update_lcd("cal")
         system.power_on()
@@ -38,7 +40,7 @@ def test_nocv():
 
 
 
-state = 0
+
 def send(angle):
     global state
     print(angle)
@@ -67,10 +69,12 @@ def send(angle):
         #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
             angle = float(angle)
+            print('state = 1 (track)')
             print(FAST+int(angle*prop)+127, NORMAL-int(angle*prop)+127)
             system.r_vel(FAST+int(angle*prop)+127)
             system.l_vel(FAST-int(angle*prop)+127)
     elif state == 0:
+        print('state = 0 (find)')
         system.r_vel(NORMAL+127)
         system.l_vel(127-NORMAL)
         system.update_lcd("finding")
