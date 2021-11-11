@@ -49,7 +49,7 @@ def send(angle):
     if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
-    elif (angle == 'turn'):
+    elif (angle == 'turn'): #unused right now
         state = 2
         system.update_lcd("turning 90")
     elif (angle == 'stop'):
@@ -85,6 +85,7 @@ def send(angle):
 def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    global state 
     state = 0
     system.shutdown_motors()
     time.sleep(1)

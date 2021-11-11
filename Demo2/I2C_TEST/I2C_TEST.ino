@@ -42,14 +42,14 @@ float positionAngular = 0; //angular position of robot
 float errorLeftMotor = 0;
 float desiredLeftMotor = 0;
 float integralLeftMotor = 0;
-float KpLeftMotor = .3;
-float KiLeftMotor = 0.003;
+float KpLeftMotor = .25;
+float KiLeftMotor = 0.00;
 
 float errorRightMotor = 0;
 float desiredRightMotor = 0;
 float integralRightMotor = 0;
-float KpRightMotor = .3;
-float KiRightMotor = 0.003;
+float KpRightMotor = .25;
+float KiRightMotor = 0.00;
 
 /*
 float errorAngular = 0; //error signal for angular position
