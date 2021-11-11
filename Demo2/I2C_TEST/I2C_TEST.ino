@@ -42,13 +42,13 @@ float positionAngular = 0; //angular position of robot
 float errorLeftMotor = 0;
 float desiredLeftMotor = 0;
 float integralLeftMotor = 0;
-float KpLeftMotor = .1;
+float KpLeftMotor = .2;
 float KiLeftMotor = 0.003;
 
 float errorRightMotor = 0;
 float desiredRightMotor = 0;
 float integralRightMotor = 0;
-float KpRightMotor = .1;
+float KpRightMotor = .2;
 float KiRightMotor = 0.003;
 
 /*
@@ -208,6 +208,10 @@ void receive_e(int events) {
     }
     else if (c[1] == POWERON) {
       on = 1;
+
+      //reset integral error to 0
+      integralLeftMotor = 0;
+      integralRightMotor = 0;
     }
       else{
       Serial.println("invalid command");

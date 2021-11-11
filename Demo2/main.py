@@ -62,7 +62,7 @@ def send(angle):
    # else:
        # state = 0
 
-    prop = 0.4 
+    prop = 0.1 
     if state == 1:
         #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
