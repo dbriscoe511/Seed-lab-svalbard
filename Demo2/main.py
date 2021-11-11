@@ -19,20 +19,21 @@ FAST = 40
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 
 def test_nocv():
-    time.sleep(1)
-    system.update_lcd("cal")
-    system.power_on()
-    send('No line detected')
-    time.sleep(3)
-    send(10)
-    time.sleep(1)
-    send(-2)
-    time.sleep(1)
-    send(0)
-    time.sleep(3)
-    send('stop')
-    time.sleep(1)
-    #send('turn')
+    while(True):
+        time.sleep(1)
+        system.update_lcd("cal")
+        system.power_on()
+        send('No line detected')
+        time.sleep(3)
+        send(10)
+        time.sleep(1)
+        send(-2)
+        time.sleep(1)
+        send(0)
+        time.sleep(3)
+        send('stop')
+        time.sleep(1)
+        #send('turn')
 
 
 
