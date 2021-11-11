@@ -58,7 +58,7 @@ def send(angle):
         time.sleep(0.5)
         system.shutdown_motors()
         system.update_lcd("powering down")
-        exit(0)
+        #exit(0)
    # else:
        # state = 0
 
