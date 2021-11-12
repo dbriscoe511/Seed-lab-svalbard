@@ -12,9 +12,7 @@ def camera_setup():
     camera.framerate = 60
 
     gains = []
-    camera.start_preview()
-    sleep(3)
-    camera.stop_preview()
+    sleep(0.1)
     for i in range(0, 10):
         gains.append(camera.awb_gains)
 
@@ -26,7 +24,7 @@ def cv_main(gains):
     
     camera = PiCamera()
     camera.resolution = (640, 480)
-    camera.framerate = 50
+    camera.framerate = 60
     g0 = np.mean(gains[0])
     g1 = np.mean(gains[1])
     camera.awb_mode = 'off'
@@ -41,8 +39,8 @@ def cv_main(gains):
         frame = stream.array
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower = np.array([50, 50, 50])
-        upper = np.array([130, 255, 255])
+        lower = np.array([100, 100, 0])
+        upper = np.array([140, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
         results = cv2.bitwise_and(frame, frame, mask=mask)
@@ -50,16 +48,16 @@ def cv_main(gains):
         kernel = np.ones((5,5),np.uint8)
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
-        #smoothed = cv2.dilate(smoothed, kernel, iterations=3)
+        #smoothed = cv2.ilate(smoothed, kernel, iterations=3)
         smoothed = smoothed[0:480, 0:640]
         
         grayscale = cv2.cvtColor(smoothed, cv2.COLOR_BGR2GRAY)     # Converts to grayscale
         
-        ret,thresh = cv2.threshold(grayscale,20,255,cv2.THRESH_BINARY)   # Performs thresholding
+        ret,thresh = cv2.threshold(grayscale,0,255,cv2.THRESH_BINARY)   # Performs thresholding
         
         
         
-        cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+        cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
         
         cX = None
         cY = None
@@ -68,26 +66,37 @@ def cv_main(gains):
         
         if len(contours) != 0:
             contours = max(contours, key = cv2.contourArea)
+            #print(cv2.contourArea(contours))
+            if cv2.contourArea(contours) < 300:
+                contours = []
         
         if len(contours) != 0:
             cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
             #for c in contours:
-            cY = np.amin(contours, out=cY)
-            cX = np.amin(contours, out=cX)
-            cY = min(cY, cX)
+            #cY = np.amin(contours, out=cY)
+            #cX = np.amin(contours, out=cX)
+            #cY = min(cY, cX)
             #print('cY: ' + str(cY))
-            contours = contours[cY:cY+30, 0:640]
+            #contours = contours[cY+10:cY+50, 0:640]
             #cv2.drawContours(smoothed, contours, -1, (0, 0, 255), 2)
-            M = cv2.moments(contours)
-            if M['m00'] != 0:
-                cX = int(M['m10'] / M['m00'])
+            #topmost = ()
+            #tmax = tuple(contours[0][contours[0][:,:,1].argmin()][0])
+            #for c in contours:
+                #topmost = tuple(c[c[:,:,1].argmin()][0])
+            topmost = tuple(contours[contours[:,:,1].argmin()][0])
+            #topmost = topmost / len(contours)
+            cX = topmost[0]
+            cY = topmost[1] - 30
+            #M = cv2.moments(contours)
+           # if M['m00'] != 0:
+               # cX = int(M['m10'] / M['m00'])
                 #cY = int(M['m01'] / M['m00'])
                 
                 
                 #print(cY)
             
-            if (cX == int and cY == int):
-                cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
+            
+            cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
                 
         if cX != None:
             angle = 27*(cX - 320)/320    # Finds angle needed to turn
@@ -101,7 +110,7 @@ def cv_main(gains):
         #1 = y pos
         #angle = angle * -1
         if cY != None:
-            if cY > 200:
+            if cY > 430:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')
@@ -111,7 +120,7 @@ def cv_main(gains):
         sys.stdout.flush()
         #print(str(angle))
         cv2.imshow('frame', smoothed)
-        #cv2.imshow('img', frame)
+        cv2.imshow('img', frame)
         #cv2.imshow('thresh', thresh)
                                   
         if cv2.waitKey(1) == ord('q'):

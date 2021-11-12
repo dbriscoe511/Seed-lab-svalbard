@@ -116,6 +116,10 @@ void loop() {
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
+  if(millis()<1000){
+    return;
+  }
+
   //digitalWrite(signMotor1,HIGH);
   //digitalWrite(signMotor2,LOW);
 

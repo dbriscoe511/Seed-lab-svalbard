@@ -18,6 +18,8 @@ NORMAL = 10
 FAST = 40
 #These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
 state = 0
+stopTest = 0
+startWait = 0
 def test_nocv():
     global state
     while(True):
@@ -43,6 +45,7 @@ def test_nocv():
 
 def send(angle):
     global state
+    global stopTest
     print(angle)
     print(state)
     
@@ -51,6 +54,7 @@ def send(angle):
         #    time.sleep(0.1)
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
+        
     elif (angle == 'turn'):
         state = 2
         system.update_lcd("turning 90")
@@ -62,7 +66,7 @@ def send(angle):
         time.sleep(0.5)
         system.shutdown_motors()
         system.update_lcd("powering down")
-        exit(0)
+        #exit(0)
     else:
         state = 0
 
@@ -72,16 +76,17 @@ def send(angle):
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
             angle = float(angle)
             print('state = 1 (track)')
-            print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
+            #print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
             system.r_vel(15-int(angle*prop)+127)
             system.l_vel(15+int(angle*prop)+127)
+            #stopTest = 1
             #system.r_vel(0-int(angle*prop)+127)
             #system.l_vel(0+int(angle*prop)+127)
     elif state == 0:
         print('state = 0 (find)')
         system.update_lcd("finding")
-        system.r_vel(NORMAL+127)
-        system.l_vel(127-NORMAL)
+        system.r_vel(15+127)
+        system.l_vel(127-15)
         
     if state == 2:
         system.angle(90)
@@ -91,13 +96,14 @@ def excersize1():
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     global state
+    global startWait
     state = 0
-    system.shutdown_motors()
-    system.update_lcd("sleeping")
-    time.sleep(1)
-    system.update_lcd("done sleeping")
+    #system.shutdown_motors()
     system.power_on()
     while process.poll() is None:
+        if startWait == 0:
+            time.sleep(0.3)
+            startWait = 1
         angle = process.stdout.readline()
         angle = angle.decode('utf-8')
         angle = angle.strip('\n')
