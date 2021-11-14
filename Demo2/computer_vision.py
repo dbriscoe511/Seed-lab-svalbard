@@ -21,15 +21,15 @@ def camera_setup():
     camera.close()
     return gains
 def cv_main(gains):
-    
     camera = PiCamera()
     camera.resolution = (640, 480)
     camera.framerate = 60
+    '''
     g0 = np.mean(gains[0])
     g1 = np.mean(gains[1])
     camera.awb_mode = 'off'
     camera.awb_gains = [g0, g1]
-    
+    '''
     stream = PiRGBArray(camera)
     sleep(0.1)
     
@@ -39,7 +39,7 @@ def cv_main(gains):
         frame = stream.array
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower = np.array([100, 100, 0])
+        lower = np.array([100, 80, 50])
         upper = np.array([140, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
@@ -67,7 +67,7 @@ def cv_main(gains):
         if len(contours) != 0:
             contours = max(contours, key = cv2.contourArea)
             #print(cv2.contourArea(contours))
-            if cv2.contourArea(contours) < 300:
+            if cv2.contourArea(contours) < 50:
                 contours = []
         
         if len(contours) != 0:
@@ -110,7 +110,7 @@ def cv_main(gains):
         #1 = y pos
         #angle = angle * -1
         if cY != None:
-            if cY > 430:
+            if cY > 500:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')

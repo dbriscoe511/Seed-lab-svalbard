@@ -20,6 +20,7 @@ FAST = 40
 state = 0
 stopTest = 0
 startWait = 0
+pastAngle = 0
 def test_nocv():
     global state
     while(True):
@@ -42,10 +43,11 @@ def test_nocv():
 
 
 
-
 def send(angle):
     global state
     global stopTest
+    global pastAngle
+    prop = 0.4 
     print(angle)
     print(state)
     
@@ -58,19 +60,22 @@ def send(angle):
     elif (angle == 'turn'):
         state = 2
         system.update_lcd("turning 90")
-    elif (angle == 'stop'):
+    elif (angle == 'No line detected' and stopTest > 5):
         system.update_lcd("stopping")
         state = 3
+        system.r_vel(15+int(pastAngle*prop)+127)
+        system.l_vel(15-int(pastAngle*prop)+127)
+        time.sleep(1)
+
         system.r_vel(127)
         system.l_vel(127)
-        time.sleep(0.5)
         system.shutdown_motors()
         system.update_lcd("powering down")
-        #exit(0)
+        exit(0)
     else:
         state = 0
 
-    prop = 0.4 
+    
     if state == 1:
         #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
@@ -79,38 +84,50 @@ def send(angle):
             #print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
             system.r_vel(15-int(angle*prop)+127)
             system.l_vel(15+int(angle*prop)+127)
-            #stopTest = 1
+            stopTest += 1
+            pastAngle = angle
             #system.r_vel(0-int(angle*prop)+127)
             #system.l_vel(0+int(angle*prop)+127)
     elif state == 0:
+        if stopTest > 0:
+            stopTest -= 1
         print('state = 0 (find)')
         system.update_lcd("finding")
-        system.r_vel(15+127)
-        system.l_vel(127-15)
+        system.r_vel(5+127)
+        system.l_vel(127-5)
         
     if state == 2:
         system.angle(90)
 
 
 def excersize1():
+    system.shutdown_motors()
+    system.r_vel(127)
+    system.l_vel(127)
+    
+
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     global state
     global startWait
     state = 0
-    #system.shutdown_motors()
-    system.power_on()
+    
+    
     while process.poll() is None:
         if startWait == 0:
             time.sleep(0.3)
+            system.power_on()
             startWait = 1
         angle = process.stdout.readline()
         angle = angle.decode('utf-8')
         angle = angle.strip('\n')
         #print(angle)
         send(angle)
-
-
+        
+    system.r_vel(127)
+    system.l_vel(127)
+    system.shutdown_motors()
+    exit(0)
         #time.sleep(0.5)
         #system.update_lcd(str(angle))
 
