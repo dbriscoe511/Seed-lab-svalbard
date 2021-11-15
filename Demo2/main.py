@@ -7,16 +7,25 @@ import subprocess
 system = comms.comm() # initialize i2c and display
 
 ''' 
-This scrip initializes a prompt of what excersize to select, followed
-Currently, the movement part of this excersize does not 
-involve communication between processors.
+This scrip initializes a prompt of what test to select, the camera script is ccalled with a subprocess,
+and the angle that is returned from computer vision times a proportional constant is fed to as a difference in speed between the two wheels.
+CV takes care of identifying diffirent robot states, such as stop/move/find 
+
+
+the send function keeps track of the robot state and calls the comms functions, 
+test_nocv inputs a set of velocity commands to test the robot movement. 
+run_with_cv opens the subprocess and starts the script
+
+This main loop should be run with MAIN.ino on the arduino 
+
 
 '''
-
-SLOW = 5
-NORMAL = 10
+# these variables are preset speeds, to abstract code 
+SLOW = 7
+NORMAL = 10 
 FAST = 40
-#These values are hard coded into the arduino on demo1, no need for this function for the first demo. 
+
+
 state = 0
 stopTest = 0
 startWait = 0
@@ -27,18 +36,18 @@ def test_nocv():
         state = 0
         time.sleep(1)
         system.update_lcd("cal")
-        system.power_on()
-        send('No line detected')
+        system.power_on() # enable motors 
+        send('No line detected') # put the robot in find state (slow spin) 
         time.sleep(3)
-        send(10)
+        send(10) # do a sweeping left turn
         time.sleep(5)
-        send(-2)
+        send(-2) #slight right turn
         time.sleep(0.5)
-        send(0)
+        send(0) #forward
         time.sleep(0)
-        send('stop')
+        send('stop') #stop
         time.sleep(1)
-        #send('turn')
+        
 
 
 
@@ -47,7 +56,7 @@ def send(angle):
     global state
     global stopTest
     global pastAngle
-    prop = 0.4 
+    prop = 0.4 #angle multiplier for speed feed
     print(angle)
     print(state)
     
@@ -57,7 +66,7 @@ def send(angle):
         state = 1 #do not revert to 0, that is only finding the tape.
         system.update_lcd("tracking")
         
-    elif (angle == 'turn'):
+    elif (angle == 'turn'): # unused for demo 2, will be used for sharp corners in final project 
         state = 2
         system.update_lcd("turning 90")
     elif (angle == 'No line detected' and stopTest > 3) or angle == 'stop':
@@ -93,32 +102,32 @@ def send(angle):
             stopTest -= 1
         print('state = 0 (find)')
         system.update_lcd("finding")
-        system.r_vel(7+127)
-        system.l_vel(127-7)
+        system.r_vel(SLOW+127)
+        system.l_vel(127-SLOW)
         
-    if state == 2:
+    if state == 2: #unused for this demo
         system.angle(90)
 
 
-def excersize1():
-    system.shutdown_motors()
+def run_with_cv():
+    system.shutdown_motors() # Make sure the robot is stopped
     system.r_vel(127)
     system.l_vel(127)
     
 
-    cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"] # setup camera as a subprocess
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)# open camera as a subprocess
     global state
     global startWait
     state = 0
     
     
-    while process.poll() is None:
-        if startWait == 0:
+    while process.poll() is None: #while the camera is sending data
+        if startWait == 0: # forces the robot to stay asleep until its ready
             time.sleep(0.3)
             system.power_on()
             startWait = 1
-        angle = process.stdout.readline()
+        angle = process.stdout.readline() # take in printed values from subprocess
         angle = angle.decode('utf-8')
         angle = angle.strip('\n')
         #print(angle)
@@ -132,11 +141,11 @@ def excersize1():
         #time.sleep(0.5)
         #system.update_lcd(str(angle))
 
-exr = int(input("what excersize?\n1: test no cv\n2: test cv\n"))
+exr = int(input("what excersize?\n1: test no cv\n2: test cv\n")) #excersize selection logic
 if exr ==1:
     #angle(degree), dist
     test_nocv()
 else:
-    excersize1()
+    run_with_cv()
 
 

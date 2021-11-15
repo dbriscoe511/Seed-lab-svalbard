@@ -14,13 +14,11 @@ import board
 import adafruit_character_lcd.character_lcd_rgb_i2c as chlcd
 import time
 
-SLOW = 20
-NORMAL = 80
-FAST = 150
 
-LEFT_WHEEL_VEL = 0
+
+#command names and arbitrary values. these are copied over to the arduino 
+LEFT_WHEEL_VEL = 0 
 RIGHT_WHEEL_VEL = 1
-DIST = 2
 ANGLE = 3
 SHUTDOWN = 4
 POWERON = 5
@@ -57,10 +55,10 @@ class comm:
                 print("IO error")
             time.sleep(0.001)
 
-        def move(self,distance): # in 1in incrments
-            self.command(DIST,distance)
         
-        def angle(self,angle):
+        
+         # currently unused
+        def angle(self,angle): 
             a = angle/4
             self.command(ANGLE,a)
             
@@ -83,7 +81,7 @@ class comm:
             self.command(RIGHT_WHEEL_VEL,0)
 
 
-        def read(self):
+        def read(self): # currently unused
                 return self.bus.read_block(self.addr)
         def update_lcd(self,val):
                 self.lcd.clear()
