@@ -60,12 +60,12 @@ def send(angle):
     elif (angle == 'turn'):
         state = 2
         system.update_lcd("turning 90")
-    elif (angle == 'No line detected' and stopTest > 5):
+    elif (angle == 'No line detected' and stopTest > 3) or angle == 'stop':
         system.update_lcd("stopping")
         state = 3
-        system.r_vel(15+int(pastAngle*prop)+127)
-        system.l_vel(15-int(pastAngle*prop)+127)
-        time.sleep(1)
+        #system.r_vel(40+int(pastAngle*prop)+127)
+        #system.l_vel(40-int(pastAngle*prop)+127)
+        #time.sleep(0.05)
 
         system.r_vel(127)
         system.l_vel(127)
@@ -82,8 +82,8 @@ def send(angle):
             angle = float(angle)
             print('state = 1 (track)')
             #print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
-            system.r_vel(15-int(angle*prop)+127)
-            system.l_vel(15+int(angle*prop)+127)
+            system.r_vel(35-int(angle*prop)+127)
+            system.l_vel(35+int(angle*prop)+127)
             stopTest += 1
             pastAngle = angle
             #system.r_vel(0-int(angle*prop)+127)
@@ -93,8 +93,8 @@ def send(angle):
             stopTest -= 1
         print('state = 0 (find)')
         system.update_lcd("finding")
-        system.r_vel(5+127)
-        system.l_vel(127-5)
+        system.r_vel(7+127)
+        system.l_vel(127-7)
         
     if state == 2:
         system.angle(90)
@@ -123,6 +123,7 @@ def excersize1():
         angle = angle.strip('\n')
         #print(angle)
         send(angle)
+        
         
     system.r_vel(127)
     system.l_vel(127)

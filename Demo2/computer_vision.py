@@ -39,13 +39,13 @@ def cv_main(gains):
         frame = stream.array
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower = np.array([100, 80, 50])
+        lower = np.array([110, 85, 60])
         upper = np.array([140, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
         results = cv2.bitwise_and(frame, frame, mask=mask)
         
-        kernel = np.ones((5,5),np.uint8)
+        kernel = np.ones((20,20),np.uint8)
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
         #smoothed = cv2.ilate(smoothed, kernel, iterations=3)
@@ -53,7 +53,7 @@ def cv_main(gains):
         
         grayscale = cv2.cvtColor(smoothed, cv2.COLOR_BGR2GRAY)     # Converts to grayscale
         
-        ret,thresh = cv2.threshold(grayscale,0,255,cv2.THRESH_BINARY)   # Performs thresholding
+        ret,thresh = cv2.threshold(grayscale,20,255,cv2.THRESH_BINARY)   # Performs thresholding
         
         
         
@@ -67,7 +67,7 @@ def cv_main(gains):
         if len(contours) != 0:
             contours = max(contours, key = cv2.contourArea)
             #print(cv2.contourArea(contours))
-            if cv2.contourArea(contours) < 50:
+            if cv2.contourArea(contours) < 30:
                 contours = []
         
         if len(contours) != 0:
@@ -83,10 +83,12 @@ def cv_main(gains):
             #tmax = tuple(contours[0][contours[0][:,:,1].argmin()][0])
             #for c in contours:
                 #topmost = tuple(c[c[:,:,1].argmin()][0])
+            
+            #arg min for top, arg max for bot
             topmost = tuple(contours[contours[:,:,1].argmin()][0])
             #topmost = topmost / len(contours)
             cX = topmost[0]
-            cY = topmost[1] - 30
+            cY = topmost[1] - 30 #plus for max, - for min
             #M = cv2.moments(contours)
            # if M['m00'] != 0:
                # cX = int(M['m10'] / M['m00'])
@@ -110,7 +112,7 @@ def cv_main(gains):
         #1 = y pos
         #angle = angle * -1
         if cY != None:
-            if cY > 500:
+            if cY > 380:
                 sys.stdout.write('stop\n')
             else:
                 sys.stdout.write(str(angle) + '\n')
@@ -119,8 +121,8 @@ def cv_main(gains):
             sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
         #print(str(angle))
-        cv2.imshow('frame', smoothed)
-        cv2.imshow('img', frame)
+        #cv2.imshow('frame', smoothed)
+        #cv2.imshow('img', frame)
         #cv2.imshow('thresh', thresh)
                                   
         if cv2.waitKey(1) == ord('q'):
