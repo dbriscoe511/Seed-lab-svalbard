@@ -34,11 +34,19 @@ float velocityAngular = 0; //angular velocity of robot
 float positionForward = 0; //forward position of robot
 float positionAngular = 0; //angular position of robot
 
-float errorForward = 0; //error signal for forward position
-float desiredForward = 36; //desired signal for forward position
-float integralForward = 0; //integral calc for forward position
-float KpForward = 2; //constant for proportional control (volt/radian)
-float KiForward = 0; //constant for integral control (volt/radian)
+float desiredVelocity = 7.4;
+
+float errorLeftMotor = 0;
+float desiredLeftMotor = desiredVelocity;
+float integralLeftMotor = 0;
+float KpLeftMotor = 1;
+float KiLeftMotor = 0;
+
+float errorRightMotor = 0;
+float desiredRightMotor = desiredVelocity;
+float integralRightMotor = 0;
+float KpRightMotor = 1;
+float KiRightMotor = 0;
 
 int PWM = 0; //ideal PWM
 int OldPWM = 0; //PWM of last iteration
@@ -70,43 +78,46 @@ void loop() { //main loop (nothing)
   timeDelta = micros()-timeMain; //time in between loops
   timeMain = micros(); //time of current loop
 
-  velocity1 = (count1*2*PI*3000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 1
+  velocity1 = (count1*2*PI*1000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 1
   count1=0; //resets counts of wheel 1
-  velocity2 = (count2*2*PI*3000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 2
+  velocity2 = (count2*2*PI*1000000.0)/(3200.0*timeDelta); //rotational velocity of wheel 2
   count2=0; //resets counts of wheel 1
-  velocityForward = (velocity1+velocity2)*(1/2.0); //forward velocity of robot
-  velocityAngular = (velocity1-velocity2)*(1/11.0); //angular velocity of robot
+  velocityForward = (velocity1+velocity2)*(3.0/2.0); //forward velocity of robot
+  velocityAngular = (velocity1-velocity2)*(3.0/11.0); //angular velocity of robot
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
-  errorForward = desiredForward - positionForward; //error signal between actual and desired position
-    if(errorForward > 0){ //sets robot to go forward if error is positive
-      digitalWrite(signMotor1,HIGH);
-      digitalWrite(signMotor2,LOW);
-    } else if (errorForward < 0){ //sets robot to go backwards if error is negative
-      digitalWrite(signMotor1,LOW);
-      digitalWrite(signMotor2,HIGH);
-    }
-  integralForward = integralForward + (errorForward * timeDelta / 1000000.0); //integral path (rad)
-  errorForward = (KpForward*errorForward)+(KiForward*integralForward); //proportional path (volts)
-  PWM = int(errorForward*52); //converts volts into PWMs (3/2v=52pwm)
+  digitalWrite(signMotor1,HIGH);
+  digitalWrite(signMotor2,LOW);
 
-  //lowpass filter
+  errorLeftMotor = (desiredLeftMotor - velocity1);
+  integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
+  PWM1 = PWM1+int(errorLeftMotor*17);
+  if(abs(PWM1)>255){ //saturates PWM and caps at 255
+    PWM1 = 255;
+  } else if (abs(PWM1)<0){
+      PWM1 = 0;
+  }
+
+  errorRightMotor = (desiredRightMotor - velocity2);
+  integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
+  PWM2 = PWM2+int(errorRightMotor*17);
+  if(abs(PWM2)>255){ //saturates PWM and caps at 255
+    PWM2 = 255;
+  } else if (abs(PWM2)<0){
+    PWM2 = 0;
+  }
+
+  /*
   if ((PWM-OldPWM) > 70) { //slows how much PWM can increase by 2v
     PWM = OldPWM+70;
   }
   if ((PWM-OldPWM) < -70){ //slows how much PWM can decrease by 2v 
     PWM = OldPWM-70;
   }
-
-  PWM1 = PWM; //PWM of left wheel
-  PWM2 = int((PWM * 19)/17); //PWM of right wheel
-
-  //saturation filter
-  if(abs(PWM2)>255){ //saturates PWM and caps at 255
-    PWM2 = 255;
-    PWM1 = int((255 * 17)/19);
-  }
+  */
 
   analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
   analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2 

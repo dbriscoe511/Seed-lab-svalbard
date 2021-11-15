@@ -6,29 +6,13 @@ import cv2
 import io
 import sys
 
-'''
-This script handles a picam and sends its coordonites to a screen
-
-It should be opened as a subprocess to keep the video running,
- it can be setup and called with the folllowing syntax:
-
-cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
-process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-while process.poll() is None:
-        time.sleep(0.5)
-        angle = process.stdout.readline()
-
-'''
-
-def camera_setup():  #Calculates the white balance to be passed to cv_main()
+def camera_setup():
     camera = PiCamera()
     camera.resolution = (640, 480)
-    camera.framerate = 50
+    camera.framerate = 60
 
     gains = []
-    camera.start_preview()
-    sleep(3)
-    camera.stop_preview()
+    sleep(0.1)
     for i in range(0, 10):
         gains.append(camera.awb_gains)
 
@@ -37,51 +21,112 @@ def camera_setup():  #Calculates the white balance to be passed to cv_main()
     camera.close()
     return gains
 def cv_main(gains):
-    
-    camera = PiCamera()  #Set up camera with passed values
+    camera = PiCamera()
     camera.resolution = (640, 480)
-    camera.framerate = 50
+    camera.framerate = 60
+    '''
     g0 = np.mean(gains[0])
     g1 = np.mean(gains[1])
     camera.awb_mode = 'off'
     camera.awb_gains = [g0, g1]
-    
+    '''
     stream = PiRGBArray(camera)
     sleep(0.1)
     
     for foo in camera.capture_continuous(stream, format='bgr', use_video_port=True):
-        stream.truncate() #Truncates the video to ensure the correct aspect ratio
+        stream.truncate()
         stream.seek(0)
         frame = stream.array
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower = np.array([50, 50, 50])
-        upper = np.array([130, 255, 255])
+        lower = np.array([110, 85, 60])
+        upper = np.array([140, 255, 255])
         
         mask = cv2.inRange(hsv, lower, upper)
-        results = cv2.bitwise_and(frame, frame, mask=mask) #Masks image to isolate blue
+        results = cv2.bitwise_and(frame, frame, mask=mask)
         
-        kernel = np.ones((5,5),np.uint8)  #Cleans up masked image with morphological transformations 
+        kernel = np.ones((20,20),np.uint8)
         closed = cv2.morphologyEx(results, cv2.MORPH_CLOSE, kernel)
         smoothed = cv2.medianBlur(closed,5)
+        #smoothed = cv2.ilate(smoothed, kernel, iterations=3)
+        smoothed = smoothed[0:480, 0:640]
         
         grayscale = cv2.cvtColor(smoothed, cv2.COLOR_BGR2GRAY)     # Converts to grayscale
         
-        ret,thresh = cv2.threshold(grayscale,50,255,cv2.THRESH_BINARY)   # Performs thresholding
+        ret,thresh = cv2.threshold(grayscale,20,255,cv2.THRESH_BINARY)   # Performs thresholding
         
-        arr = np.array(thresh)       # Converts threshold to numPy
-        arr = np.nonzero(arr)        # Nonzeros the numPy array
-        locateX = np.mean(arr[1])    # Finds center of marker
-        locateY = np.mean(arr[0])
         
-        angle = 27*(locateX - 320)/320    # Finds angle needed to turn
         
-        sys.stdout.write(str(angle) + '\n') #Writes angle to console to be read by external program
+        cont_img, contours, hierarchies, = cv2.findContours(thresh, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+        
+        cX = None
+        cY = None
+        
+        
+        
+        if len(contours) != 0:
+            contours = max(contours, key = cv2.contourArea)
+            #print(cv2.contourArea(contours))
+            if cv2.contourArea(contours) < 30:
+                contours = []
+        
+        if len(contours) != 0:
+            cv2.drawContours(smoothed, contours, -1, (0, 255, 0), 2)
+            #for c in contours:
+            #cY = np.amin(contours, out=cY)
+            #cX = np.amin(contours, out=cX)
+            #cY = min(cY, cX)
+            #print('cY: ' + str(cY))
+            #contours = contours[cY+10:cY+50, 0:640]
+            #cv2.drawContours(smoothed, contours, -1, (0, 0, 255), 2)
+            #topmost = ()
+            #tmax = tuple(contours[0][contours[0][:,:,1].argmin()][0])
+            #for c in contours:
+                #topmost = tuple(c[c[:,:,1].argmin()][0])
+            
+            #arg min for top, arg max for bot
+            topmost = tuple(contours[contours[:,:,1].argmin()][0])
+            #topmost = topmost / len(contours)
+            cX = topmost[0]
+            cY = topmost[1] - 30 #plus for max, - for min
+            #M = cv2.moments(contours)
+           # if M['m00'] != 0:
+               # cX = int(M['m10'] / M['m00'])
+                #cY = int(M['m01'] / M['m00'])
+                
+                
+                #print(cY)
+            
+            
+            cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
+                
+        if cX != None:
+            angle = 27*(cX - 320)/320    # Finds angle needed to turn
+        else:
+            angle = 'No line detected'
+        
+        #f = open('coords.txt', 'a')
+        #f.write(str(cX) + ',' + str(cY) + '\n')
+
+        #0 = x angle
+        #1 = y pos
+        #angle = angle * -1
+        if cY != None:
+            if cY > 380:
+                sys.stdout.write('stop\n')
+            else:
+                sys.stdout.write(str(angle) + '\n')
+            
+        else:
+            sys.stdout.write(str(angle) + '\n')
         sys.stdout.flush()
-        cv2.imshow('frame', thresh)
-        cv2.imshow('img', frame)
+        #print(str(angle))
+        #cv2.imshow('frame', smoothed)
+        #cv2.imshow('img', frame)
+        #cv2.imshow('thresh', thresh)
                                   
         if cv2.waitKey(1) == ord('q'):
             break
         
     cv2.destroyAllWindows()
+    #return(angle)

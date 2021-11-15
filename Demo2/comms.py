@@ -22,6 +22,8 @@ LEFT_WHEEL_VEL = 0
 RIGHT_WHEEL_VEL = 1
 DIST = 2
 ANGLE = 3
+SHUTDOWN = 4
+POWERON = 5
 
 class comm:
         bus = 0
@@ -45,9 +47,15 @@ class comm:
             #follwed by a velocity amount
             if val<0 or val>255:
                         raise ValueError("outside of byte range") # must be a byte
-            if command<0 or command>3:
+            if command<0 or command>6:
                         raise ValueError("command does not exist") # must be a byte
-            self.bus.write_block(self.addr,command,val)         
+            print(self.addr)
+            print([command,val])
+            try:
+                self.bus.write_i2c_block_data(self.addr,0,[command,val])
+            except:
+                print("IO error")
+            time.sleep(0.001)
 
         def move(self,distance): # in 1in incrments
             self.command(DIST,distance)
@@ -55,7 +63,11 @@ class comm:
         def angle(self,angle):
             a = angle/4
             self.command(ANGLE,a)
-
+            
+        def shutdown_motors(self):
+            self.command(SHUTDOWN,0)
+        def power_on(self):
+            self.command(POWERON,0)
         def r_vel(self,vel):
             self.command(RIGHT_WHEEL_VEL,vel)
 
