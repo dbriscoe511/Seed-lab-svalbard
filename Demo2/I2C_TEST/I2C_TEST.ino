@@ -39,19 +39,19 @@ float velocityAngular = 0; //angular velocity of robot
 float positionForward = 0; //forward position of robot
 float positionAngular = 0; //angular position of robot
 
-float errorLeftMotor = 0;
-float desiredLeftMotor = 0;
-float integralLeftMotor = 0;
-float KpLeftMotor = .25;
-float KiLeftMotor = 0.00;
+float errorLeftMotor = 0; //error path for left Motor
+float desiredLeftMotor = 0; //desired path for left motor
+float integralLeftMotor = 0; //integral path for left motor 
+float KpLeftMotor = .25; //proportional constant for left motor (volt*s/in)
+float KiLeftMotor = 0.00; //integral constant for left motor (volt*s/in)
 
-float errorRightMotor = 0;
-float desiredRightMotor = 0;
-float integralRightMotor = 0;
-float KpRightMotor = .25;
-float KiRightMotor = 0.00;
+float errorRightMotor = 0; //error path for right Motor
+float desiredRightMotor = 0; //desired path for left motor
+float integralRightMotor = 0; //integral path for left motor
+float KpRightMotor = .25; //proportional constant for left motor (volt*s/in)
+float KiRightMotor = 0.00; //integral constant for left motor (volt*s/in)
 
-/*
+/* Ignore this for now; Final demo stuff
 float errorAngular = 0; //error signal for angular position
 float desiredAngular = (2*PI)*(243.4/360.0); //desired signal for angular position
 float integralAngular = 0; //integral calc for angular position
@@ -59,8 +59,6 @@ float KpAngular = 15; //constant for proportional control (volt/radian)
 float KiAngular = 0.1; //constant for integral control (volt/radian)
 */
 
-//int PWM = 255; //ideal PWM
-//int OldPWM = 0; //PWM of last iteration
 int PWM1 = 0; //PWM for left wheel
 int PWM2 = 0; //PWM for right wheel
 
@@ -116,59 +114,37 @@ void loop() {
   positionForward = positionForward+(velocityForward * timeDelta/1000000.0); //forward position of robot
   positionAngular = positionAngular+(velocityAngular * timeDelta/1000000.0); //angular position of robot
 
-  if(millis()<1000){
+  if(millis()<1000){ //waits a second before going
     return;
   }
 
-  //digitalWrite(signMotor1,HIGH);
-  //digitalWrite(signMotor2,LOW);
-
-  errorLeftMotor = (desiredLeftMotor - velocity1);
-  integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorLeftMotor = (desiredLeftMotor - velocity1); //error path (in/s)
+  integralLeftMotor = integralLeftMotor + (errorLeftMotor * timeDelta / 1000000.0); //integral path (in/s)
   errorLeftMotor = (KpLeftMotor*errorLeftMotor)+(KiLeftMotor*integralLeftMotor); //proportional path (volts)
-  PWM1 = PWM1+int(errorLeftMotor*17);
-  if(abs(PWM1)>200){ //saturates PWM and caps at 255
+  PWM1 = PWM1+int(errorLeftMotor*17); //Changes left motor PWM based on input voltage
+  if(abs(PWM1)>200){ //saturates PWM and caps at 200
     PWM1 = 200;
   } else if (abs(PWM1)<0){
-      PWM1 = 0;
+    PWM1 = 0;
   }
 
-  errorRightMotor = (desiredRightMotor - velocity2);
-  integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (rad)
+  errorRightMotor = (desiredRightMotor - velocity2); //error path (in/s)
+  integralRightMotor = integralRightMotor + (errorRightMotor * timeDelta / 1000000.0); //integral path (in/s)
   errorRightMotor = (KpRightMotor*errorRightMotor)+(KiRightMotor*integralRightMotor); //proportional path (volts)
-  PWM2 = PWM2+int(errorRightMotor*17);
-  if(abs(PWM2)>200){ //saturates PWM and caps at 255
+  PWM2 = PWM2+int(errorRightMotor*17); //Changes left motor PWM based on input voltage
+  if(abs(PWM2)>200){ //saturates PWM and caps at 200
     PWM2 = 200;
   } else if (abs(PWM2)<0){
     PWM2 = 0;
   }
-  if(on){
+  if(on){ //tests if robot is on
     analogWrite(voltageMotor1,abs(PWM1)); //writes PWM counts to motor 1
     analogWrite(voltageMotor2,abs(PWM2)); //writes PWM counts to motor 2
-  } else {
+  } else { //tests if robot is off
     analogWrite(voltageMotor1,0); //writes 0 to motors
     analogWrite(voltageMotor2,0);
-
   }
-
-  //prints out data for debugging (optional)
-
-  //the print commands slowed the loop down too much. baud changed and a manual precise delay added
-  delay(50);
-  /*
-  Serial.print("velocity1: ");
-  Serial.print(velocity1);
-  Serial.print("\tvelocity2: ");
-  Serial.print(velocity2);
-  Serial.print("\tvelocityleftd: ");
-  Serial.print(desiredLeftMotor);
-  Serial.print("\tvelocityrightd: ");
-  Serial.println(desiredRightMotor);
-  Serial.print("positionForward: ");
-  Serial.print(positionForward);
-  Serial.print("\tpositionAngular: ");
-  Serial.println(positionAngular);
-  Serial.println();*/
+  delay(50); //baud changed and a manual precise delay added
 }
   
 void receive_e(int events) {
