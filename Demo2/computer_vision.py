@@ -5,6 +5,9 @@ import numpy as np
 import cv2
 import io
 import sys
+'''
+This script takes a video and isolates blue tape. It then calculates the angle the robot needs to turn to be inline with the tape
+'''
 
 # Calibrate the awb of the camera
 def camera_setup():
