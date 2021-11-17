@@ -60,13 +60,10 @@ def send(angle):
     elif (angle == 'turn'):
         state = 2
         system.update_lcd("turning 90")
-    elif (angle == 'No line detected' and stopTest > 3) or angle == 'stop':
+    elif (angle == 'No line detected' and stopTest > 3) or angle == 'stop': #If the robot sees no line after seeing a line, or 'stop' is sent
         system.update_lcd("stopping")
         state = 3
-        #system.r_vel(40+int(pastAngle*prop)+127)
-        #system.l_vel(40-int(pastAngle*prop)+127)
-        #time.sleep(0.05)
-
+        #stop the motors
         system.r_vel(127)
         system.l_vel(127)
         system.shutdown_motors()
@@ -77,18 +74,16 @@ def send(angle):
 
     
     if state == 1:
-        #print('ang:' + angle)
         if (not angle == 'No line detected' and not angle == 'turn' and not angle == 'stop' and not angle == ''):
             angle = float(angle)
             print('state = 1 (track)')
-            #print(FAST+int(angle*prop)+127, FAST-int(angle*prop)+127)
+            #Rorate the robot's center to match the tape center
             system.r_vel(35-int(angle*prop)+127)
             system.l_vel(35+int(angle*prop)+127)
             stopTest += 1
             pastAngle = angle
-            #system.r_vel(0-int(angle*prop)+127)
-            #system.l_vel(0+int(angle*prop)+127)
     elif state == 0:
+        #Rotate until it finds tape
         if stopTest > 0:
             stopTest -= 1
         print('state = 0 (find)')
@@ -105,7 +100,7 @@ def excersize1():
     system.r_vel(127)
     system.l_vel(127)
     
-
+    #cmd runs computer_vision.py as a subprocess. Angle is extracted from output
     cmd = [sys.executable, "-c", "import computer_vision as cv; gains = cv.camera_setup(); cv.cv_main(gains)"]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     global state
