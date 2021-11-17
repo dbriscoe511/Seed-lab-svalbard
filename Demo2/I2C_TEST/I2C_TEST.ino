@@ -148,39 +148,52 @@ void loop() {
 }
   
 void receive_e(int events) {
+
+  /*********
+   * The first byte of data specifies the command name, 
+   * the defines are agreed upon on the arduino and the PI, which improve code readability over just a number 
+   */
   int i = 0;
   while(Wire.available()){
     c[i] = Wire.read();
     i++; // byte length of message (a length 1 message in this case is a data request. ignore)
   }
-  //may need to disable pwm while these commands are being processed?
+
+
+  //only length 3 messages are valid, filter out and print an error for anything else 
   if (i==3){
     //Serial.println("recived command");
+
+    
     if (c[1] == LEFT_WHEEL_TARGET){
-      //Serial.println("l");
-      //state = VELOCITY_CNT;
+      
       desiredLeftMotor = ((c[2]-127)*(0.08));//0 to 255 becomes -127 to 127 and then is multiplied to reach a reasonable speed
       //Serial.println(desiredLeftMotor);
+      //Serial.println("l");
+      //state = VELOCITY_CNT;
 
-      if (desiredLeftMotor>=0){
+      //change the direction of the motor appropriatly 
+      if (desiredLeftMotor>=0){ 
         digitalWrite(signMotor1,HIGH);
       } else {
         digitalWrite(signMotor1,LOW);
       }
 
     } else if (c[1] == RIGHT_WHEEL_TARGET){
-      //Serial.println("r");
-      //state = VELOCITY_CNT;
+      
       desiredRightMotor = ((c[2]-127)*(0.08));
-
      // Serial.println(desiredRightMotor);
+     //Serial.println("r");
+     //state = VELOCITY_CNT;
+     
+     //change the direction of the motor appropriatly 
       if (desiredRightMotor>=0){
         digitalWrite(signMotor2,LOW);
       } else {
         digitalWrite(signMotor2,HIGH);
       }
 
-    //} else if (c[0] == ANGLE_TARGET){
+    //} else if (c[0] == ANGLE_TARGET){ // angle unimplemented until final demo 
     //  state = ANGLE_CNT;
     //  desiredAngular = ((c[1]-127)*(105.0/256));
     } else if (c[1] == SHUTDOWN) {
@@ -189,22 +202,22 @@ void receive_e(int events) {
     else if (c[1] == POWERON) {
       on = 1;
 
-      //reset integral error to 0
+      //reset integral error to 0 on startup
       integralLeftMotor = 0;
       integralRightMotor = 0;
     }
       else{
-      //Serial.println("invalid command");
-      //print in interupt is bad practice, but it should be fine 
+      Serial.println("invalid command");
     }
-  } else if (i>2){
-     //Serial.println("too long of a data string");
-    // Serial.println(i);
+  } else if (i>4){
+     Serial.println("too long of a data string");
+     Serial.println(i);
   } 
 }
 
 void sendData() {
-  //do not comment this out, the wire lib requres a recive event
+  //do not comment this out, the wire lib requres a send event
+  // this event seemingly does not require content, it just needs to exist
   //Wire.write(123);
 }
 
