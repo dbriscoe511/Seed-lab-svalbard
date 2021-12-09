@@ -91,7 +91,7 @@ def cv_main(gains):
             bottommost = tuple(contours[contours[:,:,1].argmax()][0])
             rightmost = tuple(contours[contours[:, :, 0].argmax()][0])
             leftmost = tuple(contours[contours[:, :, 0].argmin()][0])
-            
+            # Finds various extreme points of the tape
             M = cv2.moments(contours)
             bX = bottommost[0]
             rX = rightmost[0]
@@ -99,7 +99,7 @@ def cv_main(gains):
             rY = rightmost[1]
             lY = leftmost[1]
             tX = topmost[0]
-            tY = topmost[1] # - 30 #plus for max, - for min
+            tY = topmost[1] 
             
             cX = tX
             cY = tY
@@ -112,32 +112,7 @@ def cv_main(gains):
             
             cX2 = int((rX - lX) / 2 + lX)
             
-            #if abs(cX - 320) <= 80:
-            #    cX = cX2
-            #if cX >= 380:
-            #    cX = lX
-            #if cX <= 160:
-            #    cX = rX
-            #cX2 = int(lX + (rX - lX)/2)
-            #print(cX2)
-            #print(cX)
-            #if cX2 < cX:
-            #    cX = lX
-            #if (abs(cY - rY) < 30) and (rX > 620):
-                #cX = int(min(cX, cX2) - abs(cX-cX2)/2)
-               # cX = lX
-                #cY = lY
-            #if (abs(cY - lY) < 30) and (lX < 20):
-                #cX = int(min(cX, cX2) - abs(cX-cX2)/2)
-                #cX = rX
-               # cY = rY
-           #     cX = cX2
-            #if cX > 160:
-            #    cX = cX - 30
-            
-            #if rX / 340 > cY / 380:
-            #    cX = rX
-            #    cY = rY
+    
                 
             cv2.circle(smoothed, (cX, cY), 7, (0, 0, 255))
             cv2.circle(smoothed, (rX, rY), 7, (0, 0, 255))
@@ -152,9 +127,9 @@ def cv_main(gains):
         else:
             angle = 'No line detected'
         
-        #print(max(abs(rY - cY), abs(lY - cY)))
         
         if cY != None:
+            #Detects end of the tape if it sees a plus.
             if (abs(rX - lX) >= 180) and (rY >= 55 and lY >= 55) and (rY >= 110 or lY >= 110) and (rX > 550 or lX < 90) and (min(abs(rY - tY), abs(lY - tY)) >= 50) and (abs(lY - rY) <= 120) and (tY <= 60) and (max(abs(rY - tY), abs(lY - tY)) >= 110):
                 sys.stdout.write('stop\n')
             else:
